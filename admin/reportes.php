@@ -6,70 +6,164 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
     header("Location: ../auth/login.php");
     exit;
 }
-
-// Consultas para estadísticas
-$total_usuarios = $conn->query("SELECT COUNT(*) AS total FROM usuarios")->fetch_assoc()['total'];
-$total_clientes = $conn->query("SELECT COUNT(*) AS total FROM usuarios WHERE rol='cliente'")->fetch_assoc()['total'];
-$total_duenos = $conn->query("SELECT COUNT(*) AS total FROM usuarios WHERE rol='dueno'")->fetch_assoc()['total'];
-$total_locales = $conn->query("SELECT COUNT(*) AS total FROM locales")->fetch_assoc()['total'];
-$total_promos = $conn->query("SELECT COUNT(*) AS total FROM promociones")->fetch_assoc()['total'];
-$total_novedades = $conn->query("SELECT COUNT(*) AS total FROM novedades")->fetch_assoc()['total'];
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Reportes - Panel Admin</title>
+<title>Reportes - Administración</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 <div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>📊 Reportes Generales</h3>
-    <a href="admin.php" class="btn btn-secondary">← Volver al panel</a>
+  <h2 class="mb-4">📈 Reportes Gerenciales</h2>
+  <a href="admin.php" class="btn btn-secondary mb-3">⬅ Volver al panel</a>
+
+  <!-- Reporte 1: Promociones por local -->
+  <div class="card mb-4">
+    <div class="card-header bg-dark text-white">Promociones por Local</div>
+    <div class="card-body">
+      <?php
+      $sql1 = "SELECT l.nombreLocal, 
+                      COUNT(p.id) AS total, 
+                      SUM(p.estadoPromo='aprobada') AS aprobadas, 
+                      SUM(p.estadoPromo='pendiente') AS pendientes, 
+                      SUM(p.estadoPromo='denegada') AS denegadas
+               FROM locales l
+               LEFT JOIN promociones p ON l.id = p.id_local
+               GROUP BY l.id";
+      $res1 = $conn->query($sql1);
+      ?>
+      <table class="table table-bordered table-striped">
+        <thead class="table-secondary">
+          <tr>
+            <th>Local</th>
+            <th>Total</th>
+            <th>Aprobadas</th>
+            <th>Pendientes</th>
+            <th>Denegadas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php while ($row = $res1->fetch_assoc()): ?>
+          <tr>
+            <td><?= htmlspecialchars($row['nombreLocal']) ?></td>
+            <td><?= $row['total'] ?></td>
+            <td><?= $row['aprobadas'] ?></td>
+            <td><?= $row['pendientes'] ?></td>
+            <td><?= $row['denegadas'] ?></td>
+          </tr>
+          <?php endwhile; ?>
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <div class="row text-center">
-    <div class="col-md-4 mb-3">
-      <div class="card border-primary">
-        <div class="card-body">
-          <h5>Usuarios totales</h5>
-          <p class="display-6"><?= $total_usuarios ?></p>
-          <small>Clientes: <?= $total_clientes ?> | Dueños: <?= $total_duenos ?></small>
-        </div>
-      </div>
+  <!-- Reporte 2: Uso de promociones por cliente -->
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">Uso de Promociones por Cliente</div>
+    <div class="card-body">
+      <?php
+      $sql2 = "SELECT u.nombreUsuario, u.categoriaCliente, 
+                      COUNT(up.idUso) AS totalUsos, 
+                      SUM(up.estado='aceptada') AS aceptadas, 
+                      SUM(up.estado='rechazada') AS rechazadas
+               FROM usuarios u
+               LEFT JOIN uso_promociones up ON u.id = up.codCliente
+               WHERE u.tipoUsuario='cliente'
+               GROUP BY u.id
+               ORDER BY totalUsos DESC";
+      $res2 = $conn->query($sql2);
+      ?>
+      <table class="table table-bordered table-hover">
+        <thead class="table-primary">
+          <tr>
+            <th>Cliente</th>
+            <th>Categoría</th>
+            <th>Solicitudes Totales</th>
+            <th>Aceptadas</th>
+            <th>Rechazadas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php while ($row = $res2->fetch_assoc()): ?>
+          <tr>
+            <td><?= htmlspecialchars($row['nombreUsuario']) ?></td>
+            <td><?= $row['categoriaCliente'] ?></td>
+            <td><?= $row['totalUsos'] ?></td>
+            <td><?= $row['aceptadas'] ?></td>
+            <td><?= $row['rechazadas'] ?></td>
+          </tr>
+          <?php endwhile; ?>
+        </tbody>
+      </table>
     </div>
+  </div>
 
-    <div class="col-md-4 mb-3">
-      <div class="card border-success">
-        <div class="card-body">
-          <h5>Locales registrados</h5>
-          <p class="display-6"><?= $total_locales ?></p>
-        </div>
-      </div>
+  <!-- Reporte 3: Categorías de clientes -->
+  <div class="card mb-4">
+    <div class="card-header bg-success text-white">Distribución de Categorías de Clientes</div>
+    <div class="card-body">
+      <?php
+      $sql3 = "SELECT categoriaCliente, COUNT(*) AS cantidad
+               FROM usuarios
+               WHERE tipoUsuario='cliente'
+               GROUP BY categoriaCliente";
+      $res3 = $conn->query($sql3);
+      ?>
+      <table class="table table-bordered table-striped">
+        <thead class="table-success">
+          <tr>
+            <th>Categoría</th>
+            <th>Cantidad de Clientes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php while ($row = $res3->fetch_assoc()): ?>
+          <tr>
+            <td><?= $row['categoriaCliente'] ?></td>
+            <td><?= $row['cantidad'] ?></td>
+          </tr>
+          <?php endwhile; ?>
+        </tbody>
+      </table>
     </div>
+  </div>
 
-    <div class="col-md-4 mb-3">
-      <div class="card border-warning">
-        <div class="card-body">
-          <h5>Promociones activas</h5>
-          <p class="display-6"><?= $total_promos ?></p>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4 offset-md-4 mb-3">
-      <div class="card border-secondary">
-        <div class="card-body">
-          <h5>Novedades publicadas</h5>
-          <p class="display-6"><?= $total_novedades ?></p>
-        </div>
-      </div>
+  <!-- Reporte 4: Locales más activos -->
+  <div class="card mb-5">
+    <div class="card-header bg-info text-white">Locales Más Activos (uso de promociones)</div>
+    <div class="card-body">
+      <?php
+      $sql4 = "SELECT l.nombreLocal, COUNT(up.idUso) AS totalUsos
+               FROM uso_promociones up
+               JOIN promociones p ON up.codPromo = p.id
+               JOIN locales l ON p.id_local = l.id
+               WHERE up.estado='aceptada'
+               GROUP BY l.id
+               ORDER BY totalUsos DESC
+               LIMIT 10";
+      $res4 = $conn->query($sql4);
+      ?>
+      <table class="table table-bordered table-hover">
+        <thead class="table-info">
+          <tr>
+            <th>Local</th>
+            <th>Promociones Usadas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php while ($row = $res4->fetch_assoc()): ?>
+          <tr>
+            <td><?= htmlspecialchars($row['nombreLocal']) ?></td>
+            <td><?= $row['totalUsos'] ?></td>
+          </tr>
+          <?php endwhile; ?>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 <?php cerrarConexion($conn); ?>
