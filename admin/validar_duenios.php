@@ -10,11 +10,11 @@ if (isset($_GET['accion']) && isset($_GET['id'])) {
     $accion = $_GET['accion'];
     $id = intval($_GET['id']);
     if (in_array($accion, ['activo', 'denegado'])) {
-        $conn->query("UPDATE usuarios SET estadoCuenta='$accion' WHERE id=$id AND tipoUsuario='dueno'");
+        $conn->query("UPDATE usuarios SET estado_cuenta='$accion' WHERE id=$id AND rol='duenio'");
     }
 }
 
-$res = $conn->query("SELECT * FROM usuarios WHERE tipoUsuario='dueno'");
+$res = $conn->query("SELECT * FROM usuarios WHERE rol='duenio'");
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -41,10 +41,10 @@ $res = $conn->query("SELECT * FROM usuarios WHERE tipoUsuario='dueno'");
       <?php while ($u = $res->fetch_assoc()): ?>
         <tr>
           <td><?= $u['id'] ?></td>
-          <td><?= htmlspecialchars($u['nombreUsuario']) ?></td>
-          <td><?= ucfirst($u['estadoCuenta']) ?></td>
+          <td><?= htmlspecialchars($u['nombre']) ?></td>
+          <td><?= ucfirst($u['estado_cuenta']) ?></td>
           <td>
-            <?php if ($u['estadoCuenta'] == 'pendiente'): ?>
+            <?php if ($u['estado_cuenta'] == 'pendiente'): ?>
               <a href="?accion=activo&id=<?= $u['id'] ?>" class="btn btn-success btn-sm">Aprobar</a>
               <a href="?accion=denegado&id=<?= $u['id'] ?>" class="btn btn-danger btn-sm">Rechazar</a>
             <?php else: ?>
@@ -58,4 +58,3 @@ $res = $conn->query("SELECT * FROM usuarios WHERE tipoUsuario='dueno'");
 </div>
 </body>
 </html>
-<?php cerrarConexion($conn); ?>

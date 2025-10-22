@@ -18,7 +18,7 @@ if (isset($_POST['login'])) {
 
         switch ($user['rol']) {
             case 'admin': header("Location: admin.php"); break;
-            case 'dueno': header("Location: dueno.php"); break;
+            case 'duenio': header("Location: duenio.php"); break;
             default: header("Location: cliente.php");
         }
         exit;
@@ -33,12 +33,12 @@ if (isset($_POST['register'])) {
     $email = trim($_POST['email']);
     $password = md5(trim($_POST['password']));
     $rol = $_POST['rol'];
-    $estado = ($rol == 'dueno') ? 'pendiente' : 'activo';
+    $estado = ($rol == 'duenio') ? 'pendiente' : 'activo';
 
     $sql = "INSERT INTO usuarios (nombre, email, password, rol, categoria, estado)
             VALUES ('$nombre','$email','$password','$rol','Inicial','$estado')";
     if ($conn->query($sql)) {
-        $mensaje = ($rol == 'dueno')
+        $mensaje = ($rol == 'duenio')
             ? "Registro exitoso. Espere aprobación del administrador."
             : "Cuenta creada correctamente. Ya puede iniciar sesión.";
     } else {
@@ -52,8 +52,6 @@ if (isset($_GET['logout'])) {
     header("Location: auth.php");
     exit;
 }
-
-cerrarConexion($conn);
 ?>
 
 <!DOCTYPE html>
@@ -111,7 +109,7 @@ cerrarConexion($conn);
               <label>Tipo de usuario:</label>
               <select name="rol" class="form-select">
                 <option value="cliente">Cliente</option>
-                <option value="dueno">Dueño de local</option>
+                <option value="duenio">Dueño de local</option>
               </select>
             </div>
             <button type="submit" name="register" class="btn btn-success w-100">Crear cuenta</button>

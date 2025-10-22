@@ -2,40 +2,70 @@
 session_start();
 include_once("../includes/db.php");
 
+// Cargar PHPMailer con Composer
+require '../vendor/autoload.php'; // <-- aquí carga todo automáticamente
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']);
     $password = md5(trim($_POST['password']));
     $nombre = trim($_POST['nombre']);
-    $token = bin2hex(random_bytes(16)); // token único
+    $token = bin2hex(random_bytes(16));
 
-    $check = $conn->query("SELECT * FROM usuarios WHERE nombreUsuario='$email'");
+    $check = $conn->query("SELECT * FROM usuarios WHERE email='$email'");
     if ($check->num_rows > 0) {
         $error = "Ya existe un usuario con ese email.";
     } else {
-        $sql = "INSERT INTO usuarios (nombreUsuario, claveUsuario, tipoUsuario, categoriaCliente, estadoCuenta, tokenValidacion)
-                VALUES ('$email', '$password', 'cliente', 'Inicial', 'pendiente', '$token')";
+        $sql = "INSERT INTO usuarios (nombre, email, password, rol, categoria, estado_cuenta, token_validacion)
+                VALUES ('$nombre', '$email', '$password', 'cliente', 'inicial', 'pendiente', '$token')";
         if ($conn->query($sql)) {
-            // Envío de correo de validación
+
             $destinatario = $email;
             $asunto = "Validación de registro - Shopping Promociones";
             $mensaje = "Hola $nombre,\n\nGracias por registrarte en Shopping Promociones.\n
-Para activar tu cuenta hacé clic en el siguiente enlace:\n
-http://localhost/tp_eg/auth/validar_email.php?token=$token\n\n
-Atentamente,\nEl equipo del Shopping.";
+            Para activar tu cuenta hacé clic en el siguiente enlace:\n
+            http://localhost/tp_eg/auth/validar_email.php?token=$token\n\n
+            Atentamente,\nEl equipo del Shopping.";
 
-            $headers = "From: no-reply@shoppingpromos.com";
+            $mail = new PHPMailer(true);
 
-            if (mail($destinatario, $asunto, $mensaje, $headers)) {
+            try {
+                // Detectar entorno
+                if ($_SERVER['SERVER_NAME'] == 'localhost') {
+                    // Local: MailHog
+                    $mail->isSMTP();
+                    $mail->Host = 'localhost';
+                    $mail->Port = 1025;
+                    $mail->SMTPAuth = false;
+                    $mail->setFrom('no-reply@shoppingpromos.com', 'Shopping Promociones');
+                } else {
+                    // Producción: SMTP real
+                    $mail->isSMTP();
+                    $mail->Host = 'smtp.gmail.com';
+                    $mail->SMTPAuth = true;
+                    $mail->Username = 'tuemail@gmail.com';
+                    $mail->Password = 'tu_clave_de_aplicacion';
+                    $mail->SMTPSecure = 'tls';
+                    $mail->Port = 587;
+                    $mail->setFrom('tuemail@gmail.com', 'Shopping Promociones');
+                }
+
+                $mail->addAddress($destinatario, $nombre);
+                $mail->Subject = $asunto;
+                $mail->Body    = $mensaje;
+                $mail->send();
+
                 $mensajeOK = "Registro exitoso. Revisa tu correo para validar la cuenta.";
-            } else {
-                $mensajeOK = "Cuenta creada, pero no se pudo enviar el correo. Comunicate con soporte.";
+            } catch (Exception $e) {
+                $mensajeOK = "Cuenta creada, pero no se pudo enviar el correo. Error: {$mail->ErrorInfo}";
             }
+
         } else {
             $error = "Error al registrar usuario: " . $conn->error;
         }
     }
 }
-cerrarConexion($conn);
 ?>
 <!DOCTYPE html>
 <html lang="es">

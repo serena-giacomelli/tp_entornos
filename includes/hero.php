@@ -8,7 +8,7 @@
     <?php else: ?>
       <a href="<?php
         if ($_SESSION['usuario_rol'] == 'admin') echo '/tp_eg/admin/admin.php';
-        elseif ($_SESSION['usuario_rol'] == 'dueno') echo '/tp_eg/dueno/dueno.php';
+        elseif ($_SESSION['usuario_rol'] == 'duenio') echo '/tp_eg/duenio/duenio.php';
         else echo '/tp_eg/cliente/cliente.php';
       ?>" class="btn btn-light btn-lg">Ir a mi panel</a>
     <?php endif; ?>

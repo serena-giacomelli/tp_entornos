@@ -14,6 +14,9 @@ $id = $_SESSION['usuario_id'];
 $result = $conn->query("SELECT * FROM usuarios WHERE id=$id");
 $cliente = $result->fetch_assoc();
 
+// Contar promociones solicitadas
+$count_promos = $conn->query("SELECT COUNT(*) as total FROM uso_promociones WHERE id_cliente=$id")->fetch_assoc();
+
 // --- ACTUALIZAR PERFIL ---
 if (isset($_POST['guardar'])) {
     $nombre = trim($_POST['nombre']);
@@ -43,12 +46,31 @@ if (isset($_POST['guardar'])) {
 <body class="bg-light">
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>👤 Bienvenido, <?= htmlspecialchars($_SESSION['usuario_nombre']) ?></h3>
+    <h3>👤 Panel del Cliente</h3>
     <a href="../auth/logout.php" class="btn btn-danger">Cerrar sesión</a>
   </div>
 
   <?php if(isset($mensaje)): ?><div class="alert alert-success"><?= $mensaje ?></div><?php endif; ?>
   <?php if(isset($error)): ?><div class="alert alert-danger"><?= $error ?></div><?php endif; ?>
+
+  <!-- INFORMACIÓN DEL CLIENTE -->
+  <div class="card mb-4">
+    <div class="card-header bg-info text-white">
+      <h5 class="mb-0">👤 Información de Usuario</h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <p><strong>Nombre:</strong> <?= htmlspecialchars($cliente['nombre']) ?></p>
+          <p><strong>Email:</strong> <?= htmlspecialchars($cliente['email']) ?></p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>Categoría:</strong> <span class="badge bg-warning text-dark"><?= htmlspecialchars($cliente['categoria'] ?? 'Inicial') ?></span></p>
+          <p><strong>Promociones solicitadas:</strong> <?= $count_promos['total'] ?></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- PERFIL -->
   <div class="card">
@@ -82,24 +104,24 @@ if (isset($_POST['guardar'])) {
     $idCliente = $_SESSION['usuario_id'];
 
     if (isset($_POST['solicitar'])) {
-        $codPromo = intval($_POST['codPromo']);
-        $check = $conn->query("SELECT * FROM uso_promociones WHERE codCliente=$idCliente AND codPromo=$codPromo");
+        $id_promo = intval($_POST['id_promo']);
+        $check = $conn->query("SELECT * FROM uso_promociones WHERE id_cliente=$idCliente AND id_promo=$id_promo");
         if ($check->num_rows == 0) {
-            $conn->query("INSERT INTO uso_promociones (codCliente, codPromo) VALUES ($idCliente, $codPromo)");
+            $conn->query("INSERT INTO uso_promociones (id_cliente, id_promo) VALUES ($idCliente, $id_promo)");
             echo "<div class='alert alert-success'>Solicitud enviada al local.</div>";
         } else {
             echo "<div class='alert alert-warning'>Ya solicitaste esta promoción.</div>";
         }
     }
 
-    $sql = "SELECT p.id AS codPromo, p.textoPromo, l.nombreLocal 
+    $sql = "SELECT p.id AS id_promo, p.descripcion, l.nombre 
             FROM promociones p 
-            JOIN locales l ON p.id_local = l.id
-            WHERE p.estadoPromo='aprobada'
+            JOIN locales l ON p.id = l.id
+            WHERE p.estado='aprobada'
               AND (
-                '$categoria' = p.categoriaCliente
-                OR ('$categoria'='Medium' AND p.categoriaCliente='Inicial')
-                OR ('$categoria'='Premium' AND p.categoriaCliente IN ('Inicial','Medium'))
+                '$categoria' = p.categoria
+                OR ('$categoria'='Medium' AND p.categoria='Inicial')
+                OR ('$categoria'='Premium' AND p.categoria IN ('Inicial','Medium'))
               )";
 
     $res = $conn->query($sql);
@@ -107,16 +129,15 @@ if (isset($_POST['guardar'])) {
         while ($promo = $res->fetch_assoc()) {
             echo "
             <form method='POST' class='border rounded p-3 mb-3 bg-white'>
-              <h5>{$promo['textoPromo']}</h5>
-              <p><strong>Local:</strong> {$promo['nombreLocal']}</p>
+              <h5>{$promo['descripcion']}</h5>
+              <p><strong>Local:</strong> {$promo['nombre']}</p>
               <button type='submit' name='solicitar' value='1' class='btn btn-primary btn-sm'>Solicitar Promoción</button>
-              <input type='hidden' name='codPromo' value='{$promo['codPromo']}'>
+              <input type='hidden' name='id_promo' value='{$promo['id_promo']}'>
             </form>";
         }
     } else {
         echo "<p>No hay promociones disponibles por el momento.</p>";
     }
-    cerrarConexion($conn);
     ?>
   </div>
 </div>
@@ -141,8 +162,6 @@ if (isset($_POST['guardar'])) {
       } else {
           echo "<p>No hay novedades disponibles.</p>";
       }
-
-      cerrarConexion($conn);
       ?>
     </div>
   </div>

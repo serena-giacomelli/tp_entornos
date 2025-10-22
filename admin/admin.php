@@ -8,13 +8,13 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
 }
 
 // Mensaje de aprobación
-if (isset($_GET['msg']) && $_GET['msg'] == 'dueno_aprobado') {
+if (isset($_GET['msg']) && $_GET['msg'] == 'duenio_aprobado') {
     $msg = "Dueño aprobado correctamente.";
 }
 
 // Consultar dueños pendientes
-$sql_duenos = "SELECT * FROM usuarios WHERE rol='dueno' AND estado='pendiente'";
-$res_duenos = $conn->query($sql_duenos);
+$sql_duenios = "SELECT * FROM usuarios WHERE rol='duenio' AND estado='pendiente'";
+$res_duenios = $conn->query($sql_duenios);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -27,7 +27,7 @@ $res_duenos = $conn->query($sql_duenos);
 
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>👑 Panel del Administrador</h2>
+    <h2>Panel del Administrador</h2>
     <a href="../auth/logout.php" class="btn btn-danger">Cerrar sesión</a>
   </div>
 
@@ -67,7 +67,7 @@ $res_duenos = $conn->query($sql_duenos);
       Dueños de Local Pendientes de Aprobación
     </div>
     <div class="card-body">
-      <?php if($res_duenos->num_rows > 0): ?>
+      <?php if($res_duenios->num_rows > 0): ?>
         <table class="table table-striped">
           <thead>
             <tr>
@@ -78,7 +78,7 @@ $res_duenos = $conn->query($sql_duenos);
             </tr>
           </thead>
           <tbody>
-            <?php while($d = $res_duenos->fetch_assoc()): ?>
+            <?php while($d = $res_duenios->fetch_assoc()): ?>
               <tr>
                 <td><?= $d['id'] ?></td>
                 <td><?= htmlspecialchars($d['nombre']) ?></td>
@@ -100,4 +100,3 @@ $res_duenos = $conn->query($sql_duenos);
 
 </body>
 </html>
-<?php cerrarConexion($conn); ?>

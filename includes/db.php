@@ -23,8 +23,15 @@ $conn->set_charset("utf8mb4");
 
 // Función para cerrar conexión
 function cerrarConexion($conn) {
-    if ($conn && $conn instanceof mysqli) {
-        $conn->close();
+    if ($conn && $conn instanceof mysqli && !$conn->connect_error) {
+        // Verificar si la conexión aún está activa antes de cerrar
+        try {
+            if ($conn->ping()) {
+                $conn->close();
+            }
+        } catch (Exception $e) {
+            // La conexión ya está cerrada, no hacer nada
+        }
     }
 }
 

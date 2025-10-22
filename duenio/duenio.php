@@ -2,41 +2,48 @@
 session_start();
 include_once("../includes/db.php");
 
-if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'dueno') {
+if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'duenio') {
     header("Location: ../auth/login.php");
     exit;
 }
 
-$dueno_id = $_SESSION['usuario_id'];
+$duenio_id = $_SESSION['usuario_id'];
+
+// Obtener datos del dueño
+$result_duenio = $conn->query("SELECT * FROM usuarios WHERE id=$duenio_id");
+$duenio = $result_duenio->fetch_assoc();
+
+// Contar locales del dueño
+$count_locales = $conn->query("SELECT COUNT(*) as total FROM locales WHERE id=$duenio_id")->fetch_assoc();
 
 // --- CREAR PROMOCIÓN ---
 if (isset($_POST['agregar_promo'])) {
     $titulo = trim($_POST['titulo']);
     $descripcion = trim($_POST['descripcion']);
-    $id_local = intval($_POST['id_local']);
+    $id = intval($_POST['id']);
     $dias = trim($_POST['dias_vigencia']);
     $categoria = trim($_POST['categoria_minima']);
     $fecha_inicio = $_POST['fecha_inicio'];
     $fecha_fin = $_POST['fecha_fin'];
 
     $conn->query("INSERT INTO promociones 
-        (id_local, titulo, descripcion, fecha_inicio, fecha_fin, dias_vigencia, categoria_minima, estado)
-        VALUES ($id_local,'$titulo','$descripcion','$fecha_inicio','$fecha_fin','$dias','$categoria','pendiente')");
+        (id, titulo, descripcion, fecha_inicio, fecha_fin, dias_vigencia, categoria_minima, estado)
+        VALUES ($id,'$titulo','$descripcion','$fecha_inicio','$fecha_fin','$dias','$categoria','pendiente')");
 }
 
 // --- ELIMINAR PROMOCIÓN ---
 if (isset($_GET['eliminar'])) {
     $id = intval($_GET['eliminar']);
-    $conn->query("DELETE FROM promociones WHERE id=$id AND id_local IN (SELECT id FROM locales WHERE id_dueno=$dueno_id)");
+    $conn->query("DELETE FROM promociones WHERE id=$id AND id IN (SELECT id FROM locales WHERE id=$duenio_id)");
 }
 
 // Consultar locales del dueño
-$locales = $conn->query("SELECT * FROM locales WHERE id_dueno=$dueno_id");
+$locales = $conn->query("SELECT * FROM locales WHERE id=$duenio_id");
 // Consultar promociones del dueño
 $promos = $conn->query("SELECT p.*, l.nombre AS local 
                         FROM promociones p 
-                        JOIN locales l ON p.id_local=l.id 
-                        WHERE l.id_dueno=$dueno_id ORDER BY p.fecha_inicio DESC");
+                        JOIN locales l ON p.id=l.id 
+                        WHERE l.id=$duenio_id ORDER BY p.fecha_inicio DESC");
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -48,10 +55,30 @@ $promos = $conn->query("SELECT p.*, l.nombre AS local
 <body class="bg-light">
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>🎟️ Mis Promociones</h3>
+    <h3>🎟️ Panel de Dueño</h3>
     <a href="../auth/logout.php" class="btn btn-danger">Cerrar sesión</a>
   </div>
 
+  <!-- INFORMACIÓN DEL DUEÑO -->
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">👤 Información del Dueño</h5>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6">
+          <p><strong>Nombre:</strong> <?= htmlspecialchars($duenio['nombre']) ?></p>
+          <p><strong>Email:</strong> <?= htmlspecialchars($duenio['email']) ?></p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>Rol:</strong> <span class="badge bg-success">Dueño de Local</span></p>
+          <p><strong>Total de Locales:</strong> <?= $count_locales['total'] ?></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h4 class="mb-3">🎟️ Mis Promociones</h4>
   <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalAgregar">➕ Nueva Promoción</button>
 
   <table class="table table-bordered">
@@ -101,7 +128,7 @@ $promos = $conn->query("SELECT p.*, l.nombre AS local
             </div>
             <div class="mb-3">
               <label>Local:</label>
-              <select name="id_local" class="form-select" required>
+              <select name="id" class="form-select" required>
                 <option value="">Seleccionar...</option>
                 <?php
                 $locales->data_seek(0);
@@ -140,5 +167,3 @@ $promos = $conn->query("SELECT p.*, l.nombre AS local
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-<?php cerrarConexion($conn); ?>

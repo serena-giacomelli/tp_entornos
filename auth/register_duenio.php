@@ -7,12 +7,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = md5(trim($_POST['password']));
     $nombre = trim($_POST['nombre']);
 
-    $check = $conn->query("SELECT * FROM usuarios WHERE nombreUsuario='$email'");
+    $check = $conn->query("SELECT * FROM usuarios WHERE email='$email'");
     if ($check->num_rows > 0) {
         $error = "Ya existe un usuario con ese email.";
     } else {
-        $sql = "INSERT INTO usuarios (nombreUsuario, claveUsuario, tipoUsuario, estadoCuenta)
-                VALUES ('$email', '$password', 'dueno', 'pendiente')";
+        $sql = "INSERT INTO usuarios (nombre, email, password, rol, estado_cuenta)
+                VALUES ('$nombre', '$email', '$password', 'duenio', 'pendiente')";
         if ($conn->query($sql)) {
             $mensajeOK = "Registro exitoso. Tu cuenta debe ser aprobada por el administrador antes de poder acceder.";
         } else {
@@ -20,7 +20,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 }
-cerrarConexion($conn);
 ?>
 <!DOCTYPE html>
 <html lang="es">

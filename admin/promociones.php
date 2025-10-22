@@ -13,10 +13,12 @@ if (isset($_POST['agregar'])) {
     $descripcion = trim($_POST['descripcion']);
     $id_local = intval($_POST['id_local']);
     $categoria = trim($_POST['categoria_minima']);
+    $fecha_inicio = trim($_POST['fecha_inicio']);
+    $fecha_fin = trim($_POST['fecha_fin']);
     $estado = "aprobada";
 
-    $conn->query("INSERT INTO promociones (titulo, descripcion, id_local, categoria_minima, estado)
-                  VALUES ('$titulo','$descripcion',$id_local,'$categoria','$estado')");
+    $conn->query("INSERT INTO promociones (titulo, descripcion, id_local, categoria_minima, fecha_inicio, fecha_fin, estado)
+                  VALUES ('$titulo','$descripcion',$id_local,'$categoria','$fecha_inicio','$fecha_fin','$estado')");
 }
 
 // --- ELIMINAR PROMOCIÓN ---
@@ -107,8 +109,20 @@ $locales = $conn->query("SELECT id, nombre FROM locales");
             </select>
           </div>
           <div class="mb-3">
+            <label>Fecha inicio:</label>
+            <input type="date" name="fecha_inicio" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label>Fecha fin:</label>
+            <input type="date" name="fecha_fin" class="form-control" required>
+          </div>
+          <div class="mb-3">
             <label>Categoría mínima:</label>
-            <input type="text" name="categoria_minima" class="form-control">
+            <select name="categoria_minima" class="form-select" required>
+              <option value="inicial">Inicial</option>
+              <option value="medium">Medium</option>
+              <option value="premium">Premium</option>
+            </select>
           </div>
         </div>
         <div class="modal-footer">
@@ -122,5 +136,3 @@ $locales = $conn->query("SELECT id, nombre FROM locales");
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-<?php cerrarConexion($conn); ?>

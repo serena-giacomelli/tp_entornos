@@ -24,11 +24,11 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
     <div class="card-header bg-dark text-white">Promociones por Local</div>
     <div class="card-body">
       <?php
-      $sql1 = "SELECT l.nombreLocal, 
+      $sql1 = "SELECT l.nombre, 
                       COUNT(p.id) AS total, 
-                      SUM(p.estadoPromo='aprobada') AS aprobadas, 
-                      SUM(p.estadoPromo='pendiente') AS pendientes, 
-                      SUM(p.estadoPromo='denegada') AS denegadas
+                      SUM(p.estado='aprobada') AS aprobadas, 
+                      SUM(p.estado='pendiente') AS pendientes, 
+                      SUM(p.estado='denegada') AS denegadas
                FROM locales l
                LEFT JOIN promociones p ON l.id = p.id_local
                GROUP BY l.id";
@@ -47,7 +47,7 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
         <tbody>
           <?php while ($row = $res1->fetch_assoc()): ?>
           <tr>
-            <td><?= htmlspecialchars($row['nombreLocal']) ?></td>
+            <td><?= htmlspecialchars($row['nombre']) ?></td>
             <td><?= $row['total'] ?></td>
             <td><?= $row['aprobadas'] ?></td>
             <td><?= $row['pendientes'] ?></td>
@@ -64,13 +64,13 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
     <div class="card-header bg-primary text-white">Uso de Promociones por Cliente</div>
     <div class="card-body">
       <?php
-      $sql2 = "SELECT u.nombreUsuario, u.categoriaCliente, 
-                      COUNT(up.idUso) AS totalUsos, 
+      $sql2 = "SELECT u.nombre, u.categoria, 
+                      COUNT(up.id) AS totalUsos, 
                       SUM(up.estado='aceptada') AS aceptadas, 
                       SUM(up.estado='rechazada') AS rechazadas
                FROM usuarios u
-               LEFT JOIN uso_promociones up ON u.id = up.codCliente
-               WHERE u.tipoUsuario='cliente'
+               LEFT JOIN uso_promociones up ON u.id = up.id_cliente
+               WHERE u.rol='cliente'
                GROUP BY u.id
                ORDER BY totalUsos DESC";
       $res2 = $conn->query($sql2);
@@ -88,8 +88,8 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
         <tbody>
           <?php while ($row = $res2->fetch_assoc()): ?>
           <tr>
-            <td><?= htmlspecialchars($row['nombreUsuario']) ?></td>
-            <td><?= $row['categoriaCliente'] ?></td>
+            <td><?= htmlspecialchars($row['nombre']) ?></td>
+            <td><?= $row['categoria'] ?></td>
             <td><?= $row['totalUsos'] ?></td>
             <td><?= $row['aceptadas'] ?></td>
             <td><?= $row['rechazadas'] ?></td>
@@ -105,10 +105,10 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
     <div class="card-header bg-success text-white">Distribución de Categorías de Clientes</div>
     <div class="card-body">
       <?php
-      $sql3 = "SELECT categoriaCliente, COUNT(*) AS cantidad
+      $sql3 = "SELECT categoria, COUNT(*) AS cantidad
                FROM usuarios
-               WHERE tipoUsuario='cliente'
-               GROUP BY categoriaCliente";
+               WHERE rol='cliente'
+               GROUP BY categoria";
       $res3 = $conn->query($sql3);
       ?>
       <table class="table table-bordered table-striped">
@@ -121,7 +121,7 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
         <tbody>
           <?php while ($row = $res3->fetch_assoc()): ?>
           <tr>
-            <td><?= $row['categoriaCliente'] ?></td>
+            <td><?= $row['categoria'] ?></td>
             <td><?= $row['cantidad'] ?></td>
           </tr>
           <?php endwhile; ?>
@@ -135,9 +135,9 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
     <div class="card-header bg-info text-white">Locales Más Activos (uso de promociones)</div>
     <div class="card-body">
       <?php
-      $sql4 = "SELECT l.nombreLocal, COUNT(up.idUso) AS totalUsos
+      $sql4 = "SELECT l.nombre, COUNT(up.id) AS totalUsos
                FROM uso_promociones up
-               JOIN promociones p ON up.codPromo = p.id
+               JOIN promociones p ON up.id_promo = p.id
                JOIN locales l ON p.id_local = l.id
                WHERE up.estado='aceptada'
                GROUP BY l.id
@@ -155,7 +155,7 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
         <tbody>
           <?php while ($row = $res4->fetch_assoc()): ?>
           <tr>
-            <td><?= htmlspecialchars($row['nombreLocal']) ?></td>
+            <td><?= htmlspecialchars($row['nombre']) ?></td>
             <td><?= $row['totalUsos'] ?></td>
           </tr>
           <?php endwhile; ?>
@@ -166,4 +166,3 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
 </div>
 </body>
 </html>
-<?php cerrarConexion($conn); ?>

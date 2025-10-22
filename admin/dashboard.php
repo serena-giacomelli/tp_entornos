@@ -18,17 +18,16 @@ if (!isAdmin()) {
 
 // Cantidad de usuarios por rol
 $rolesData = $conn->query("
-    SELECT r.nombre AS rol, COUNT(u.id) AS cantidad
-    FROM roles r
-    LEFT JOIN usuarios u ON r.id = u.rol_id
-    GROUP BY r.id
+    SELECT rol, COUNT(id) AS cantidad
+    FROM usuarios
+    GROUP BY rol
 ");
 
 // Dueños pendientes
 $dueniosPendientes = $conn->query("
     SELECT id, nombre, email, fecha_registro 
     FROM usuarios 
-    WHERE rol_id = 2 AND estado = 'pendiente'
+    WHERE rol = 'duenio' AND estado_cuenta = 'pendiente'
 ");
 
 // Cantidad de promociones activas
@@ -38,7 +37,7 @@ $promosActivas = $conn->query("
 
 // Cantidad de novedades activas
 $novedadesActivas = $conn->query("
-    SELECT COUNT(*) AS total FROM novedades WHERE estado = 'activa'
+    SELECT COUNT(*) AS total FROM novedades
 ")->fetch_assoc()['total'];
 
 // Acción: aprobar/rechazar dueño
@@ -47,9 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'], $_POST['id_
     $id_duenio = (int) $_POST['id_duenio'];
 
     if ($accion === 'aprobar') {
-        $update = $conn->prepare("UPDATE usuarios SET estado = 'activo' WHERE id = ?");
+        $update = $conn->prepare("UPDATE usuarios SET estado_cuenta = 'activo' WHERE id = ?");
     } else {
-        $update = $conn->prepare("UPDATE usuarios SET estado = 'inactivo' WHERE id = ?");
+        $update = $conn->prepare("UPDATE usuarios SET estado_cuenta = 'denegado' WHERE id = ?");
     }
 
     $update->bind_param("i", $id_duenio);

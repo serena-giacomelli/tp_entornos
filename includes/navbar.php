@@ -9,11 +9,12 @@
         <?php if (!isset($_SESSION['usuario_rol'])): ?>
           <li class="nav-item"><a href="/tp_eg/auth/login.php" class="nav-link">Iniciar sesión</a></li>
           <li class="nav-item"><a href="/tp_eg/auth/register.php" class="nav-link">Registrarse</a></li>
+          <li class="nav-item"><a href="/tp_eg/contacto.php" class="nav-link">Contacto</a></li>
         <?php else: ?>
           <?php if ($_SESSION['usuario_rol'] == 'admin'): ?>
             <li class="nav-item"><a href="/tp_eg/admin/admin.php" class="nav-link">Panel Admin</a></li>
-          <?php elseif ($_SESSION['usuario_rol'] == 'dueno'): ?>
-            <li class="nav-item"><a href="/tp_eg/dueno/dueno.php" class="nav-link">Panel Dueño</a></li>
+          <?php elseif ($_SESSION['usuario_rol'] == 'duenio'): ?>
+            <li class="nav-item"><a href="/tp_eg/duenio/duenio.php" class="nav-link">Panel Dueño</a></li>
           <?php elseif ($_SESSION['usuario_rol'] == 'cliente'): ?>
             <li class="nav-item"><a href="/tp_eg/cliente/cliente.php" class="nav-link">Panel Cliente</a></li>
           <?php endif; ?>
@@ -23,3 +24,4 @@
     </div>
   </div>
 </nav>
+

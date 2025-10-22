@@ -5,7 +5,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email = trim($_POST['email']);
     $password = md5(trim($_POST['password']));
 
-    $sql = "SELECT * FROM usuarios WHERE email='$email' AND password='$password' AND estado='activo'";
+    $sql = "SELECT * FROM usuarios WHERE email='$email' AND password='$password' AND estado_cuenta='activo'";
     $res = $conn->query($sql);
 
     if ($res->num_rows == 1) {
@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         switch ($user['rol']) {
             case 'admin': header("Location: ../admin/admin.php"); break;
-            case 'dueno': header("Location: ../dueno/dueno.php"); break;
+            case 'duenio': header("Location: ../duenio/duenio.php"); break;
             case 'cliente': header("Location: ../cliente/cliente.php"); break;
         }
         exit;
@@ -25,7 +25,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $error = "Credenciales incorrectas o cuenta inactiva.";
     }
 }
-cerrarConexion($conn);
 ?>
 
 <!DOCTYPE html>

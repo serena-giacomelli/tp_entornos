@@ -11,10 +11,11 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
 // --- CREAR LOCAL ---
 if (isset($_POST['agregar'])) {
     $nombre = trim($_POST['nombre']);
-    $direccion = trim($_POST['direccion']);
-    $dueno_id = intval($_POST['dueno_id']);
+    $rubro = trim($_POST['rubro']);
+    $codigo = trim($_POST['codigo']);
+    $duenio_id = intval($_POST['duenio_id']);
 
-    $sql = "INSERT INTO locales (nombre, direccion, id_dueno) VALUES ('$nombre','$direccion',$dueno_id)";
+    $sql = "INSERT INTO locales (nombre, rubro, codigo, id_duenio) VALUES ('$nombre','$rubro','$codigo',$duenio_id)";
     $conn->query($sql);
 }
 
@@ -28,19 +29,20 @@ if (isset($_GET['eliminar'])) {
 if (isset($_POST['editar'])) {
     $id = intval($_POST['id']);
     $nombre = trim($_POST['nombre']);
-    $direccion = trim($_POST['direccion']);
-    $dueno_id = intval($_POST['dueno_id']);
-    $conn->query("UPDATE locales SET nombre='$nombre', direccion='$direccion', id_dueno=$dueno_id WHERE id=$id");
+    $rubro = trim($_POST['rubro']);
+    $codigo = trim($_POST['codigo']);
+    $duenio_id = intval($_POST['duenio_id']);
+    $conn->query("UPDATE locales SET nombre='$nombre', rubro='$rubro', codigo='$codigo', id_duenio=$duenio_id WHERE id=$id");
 }
 
 // Traer todos los locales
-$sql_locales = "SELECT l.*, u.nombre AS dueno 
+$sql_locales = "SELECT l.*, u.nombre AS duenio 
                 FROM locales l 
-                LEFT JOIN usuarios u ON l.id_dueno = u.id";
+                LEFT JOIN usuarios u ON l.id_duenio = u.id";
 $res_locales = $conn->query($sql_locales);
 
 // Traer dueños para el formulario
-$duenos = $conn->query("SELECT id, nombre FROM usuarios WHERE rol='dueno' AND estado='activo'");
+$duenios = $conn->query("SELECT id, nombre FROM usuarios WHERE rol='duenio' AND estado_cuenta='activo'");
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -66,7 +68,8 @@ $duenos = $conn->query("SELECT id, nombre FROM usuarios WHERE rol='dueno' AND es
       <tr>
         <th>ID</th>
         <th>Nombre</th>
-        <th>Dirección</th>
+        <th>Rubro</th>
+        <th>Código</th>
         <th>Dueño</th>
         <th>Acciones</th>
       </tr>
@@ -76,8 +79,9 @@ $duenos = $conn->query("SELECT id, nombre FROM usuarios WHERE rol='dueno' AND es
         <tr>
           <td><?= $l['id'] ?></td>
           <td><?= htmlspecialchars($l['nombre']) ?></td>
-          <td><?= htmlspecialchars($l['direccion']) ?></td>
-          <td><?= htmlspecialchars($l['dueno'] ?? '—') ?></td>
+          <td><?= htmlspecialchars($l['rubro']) ?></td>
+          <td><?= htmlspecialchars($l['codigo']) ?></td>
+          <td><?= htmlspecialchars($l['duenio'] ?? '—') ?></td>
           <td>
             <!-- Botón editar -->
             <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditar<?= $l['id'] ?>">✏️</button>
@@ -101,17 +105,21 @@ $duenos = $conn->query("SELECT id, nombre FROM usuarios WHERE rol='dueno' AND es
                     <input type="text" name="nombre" value="<?= htmlspecialchars($l['nombre']) ?>" class="form-control" required>
                   </div>
                   <div class="mb-3">
-                    <label>Dirección:</label>
-                    <input type="text" name="direccion" value="<?= htmlspecialchars($l['direccion']) ?>" class="form-control" required>
+                    <label>Rubro:</label>
+                    <input type="text" name="rubro" value="<?= htmlspecialchars($l['rubro']) ?>" class="form-control" required>
+                  </div>
+                  <div class="mb-3">
+                    <label>Código:</label>
+                    <input type="text" name="codigo" value="<?= htmlspecialchars($l['codigo']) ?>" class="form-control" required>
                   </div>
                   <div class="mb-3">
                     <label>Dueño:</label>
-                    <select name="dueno_id" class="form-select">
+                    <select name="duenio_id" class="form-select">
                       <?php
-                      $duenos->data_seek(0);
-                      while($d = $duenos->fetch_assoc()):
+                      $duenios->data_seek(0);
+                      while($d = $duenios->fetch_assoc()):
                       ?>
-                        <option value="<?= $d['id'] ?>" <?= ($l['id_dueno'] == $d['id']) ? 'selected' : '' ?>>
+                        <option value="<?= $d['id'] ?>" <?= ($l['id_duenio'] == $d['id']) ? 'selected' : '' ?>>
                           <?= htmlspecialchars($d['nombre']) ?>
                         </option>
                       <?php endwhile; ?>
@@ -145,16 +153,20 @@ $duenos = $conn->query("SELECT id, nombre FROM usuarios WHERE rol='dueno' AND es
             <input type="text" name="nombre" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label>Dirección:</label>
-            <input type="text" name="direccion" class="form-control" required>
+            <label>Rubro:</label>
+            <input type="text" name="rubro" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label>Código:</label>
+            <input type="text" name="codigo" class="form-control" required>
           </div>
           <div class="mb-3">
             <label>Dueño:</label>
-            <select name="dueno_id" class="form-select" required>
+            <select name="duenio_id" class="form-select" required>
               <option value="">Seleccionar...</option>
               <?php
-              $duenos->data_seek(0);
-              while($d = $duenos->fetch_assoc()):
+              $duenios->data_seek(0);
+              while($d = $duenios->fetch_assoc()):
               ?>
                 <option value="<?= $d['id'] ?>"><?= htmlspecialchars($d['nombre']) ?></option>
               <?php endwhile; ?>
@@ -172,5 +184,3 @@ $duenos = $conn->query("SELECT id, nombre FROM usuarios WHERE rol='dueno' AND es
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-<?php cerrarConexion($conn); ?>
