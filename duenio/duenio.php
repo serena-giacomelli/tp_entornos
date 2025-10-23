@@ -2,6 +2,11 @@
 session_start();
 include_once("../includes/db.php");
 
+// Cargar PHPMailer con Composer
+require '../vendor/autoload.php';
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'duenio') {
     header("Location: ../auth/login.php");
     exit;
@@ -14,36 +19,107 @@ $result_duenio = $conn->query("SELECT * FROM usuarios WHERE id=$duenio_id");
 $duenio = $result_duenio->fetch_assoc();
 
 // Contar locales del dueño
-$count_locales = $conn->query("SELECT COUNT(*) as total FROM locales WHERE id=$duenio_id")->fetch_assoc();
+$count_locales = $conn->query("SELECT COUNT(*) as total FROM locales WHERE id_duenio=$duenio_id")->fetch_assoc();
+$num_locales = $count_locales['total'];
+
+// Si tiene un solo local, obtener sus datos
+$local_unico = null;
+if ($num_locales == 1) {
+    $local_unico = $conn->query("SELECT * FROM locales WHERE id_duenio=$duenio_id LIMIT 1")->fetch_assoc();
+}
 
 // --- CREAR PROMOCIÓN ---
 if (isset($_POST['agregar_promo'])) {
     $titulo = trim($_POST['titulo']);
     $descripcion = trim($_POST['descripcion']);
-    $id = intval($_POST['id']);
     $dias = trim($_POST['dias_vigencia']);
     $categoria = trim($_POST['categoria_minima']);
     $fecha_inicio = $_POST['fecha_inicio'];
     $fecha_fin = $_POST['fecha_fin'];
+    
+    // Determinar el local
+    if (isset($_POST['id_local'])) {
+        // Si tiene varios locales, viene del dropdown
+        $id_local = intval($_POST['id_local']);
+    } else {
+        // Si tiene un solo local, tomarlo automáticamente
+        $local_result = $conn->query("SELECT id FROM locales WHERE id_duenio=$duenio_id LIMIT 1");
+        if ($local_result && $local_result->num_rows > 0) {
+            $local_data = $local_result->fetch_assoc();
+            $id_local = $local_data['id'];
+        } else {
+            $error_message = "Error: No tienes ningún local registrado. Por favor, contacta al administrador.";
+            $id_local = null;
+        }
+    }
 
-    $conn->query("INSERT INTO promociones 
-        (id, titulo, descripcion, fecha_inicio, fecha_fin, dias_vigencia, categoria_minima, estado)
-        VALUES ($id,'$titulo','$descripcion','$fecha_inicio','$fecha_fin','$dias','$categoria','pendiente')");
-}
+    if ($id_local) {
+        $sql = "INSERT INTO promociones 
+            (id_local, titulo, descripcion, fecha_inicio, fecha_fin, dias_vigencia, categoria_minima, estado)
+            VALUES ($id_local,'$titulo','$descripcion','$fecha_inicio','$fecha_fin','$dias','$categoria','pendiente')";
+        
+        if ($conn->query($sql)) {
+            // Enviar email al administrador
+            $admin = $conn->query("SELECT email, nombre FROM usuarios WHERE rol='admin' LIMIT 1")->fetch_assoc();
+        
+        if ($admin) {
+            $mail = new PHPMailer(true);
+            
+            try {
+                // Configuración según entorno
+                if ($_SERVER['SERVER_NAME'] == 'localhost') {
+                    // Local: MailHog
+                    $mail->isSMTP();
+                    $mail->Host = 'localhost';
+                    $mail->Port = 1025;
+                    $mail->SMTPAuth = false;
+                    $mail->setFrom('no-reply@ofertopolis.com', 'Ofertópolis');
+                } else {
+                    // Producción: SMTP real
+                    $mail->isSMTP();
+                    $mail->Host = 'smtp.gmail.com';
+                    $mail->SMTPAuth = true;
+                    $mail->Username = 'tuemail@gmail.com';
+                    $mail->Password = 'tu_clave_de_aplicacion';
+                    $mail->SMTPSecure = 'tls';
+                    $mail->Port = 587;
+                    $mail->setFrom('notificaciones@ofertopolis.com', 'Ofertópolis');
+                }
 
-// --- ELIMINAR PROMOCIÓN ---
+                $mail->addAddress($admin['email'], $admin['nombre']);
+                $mail->Subject = '🎟️ Nueva promoción pendiente de aprobación';
+                $mail->Body = "Hola {$admin['nombre']},\n\n" .
+                              "Un dueño de local ha creado una nueva promoción que necesita revisión:\n\n" .
+                              "📌 Título: $titulo\n" .
+                              "📝 Descripción: $descripcion\n" .
+                              "📅 Vigencia: del $fecha_inicio al $fecha_fin\n\n" .
+                              "Por favor, ingresa al panel de administración para aprobar o rechazar esta promoción.\n\n" .
+                              "Atentamente,\n" .
+                              "Sistema Ofertópolis";
+                
+                $mail->send();
+                $success_message = "Promoción creada exitosamente. Se ha notificado al administrador.";
+            } catch (Exception $e) {
+                $success_message = "Promoción creada, pero no se pudo enviar el correo al administrador. Error: {$mail->ErrorInfo}";
+            }
+        } else {
+            $success_message = "Promoción creada exitosamente.";
+        }
+        } 
+    } 
+} 
 if (isset($_GET['eliminar'])) {
     $id = intval($_GET['eliminar']);
-    $conn->query("DELETE FROM promociones WHERE id=$id AND id IN (SELECT id FROM locales WHERE id=$duenio_id)");
+    $conn->query("DELETE FROM promociones WHERE id=$id AND id_local IN (SELECT id FROM locales WHERE id_duenio=$duenio_id)");
 }
 
 // Consultar locales del dueño
-$locales = $conn->query("SELECT * FROM locales WHERE id=$duenio_id");
+$locales = $conn->query("SELECT * FROM locales WHERE id_duenio=$duenio_id");
 // Consultar promociones del dueño
 $promos = $conn->query("SELECT p.*, l.nombre AS local 
                         FROM promociones p 
-                        JOIN locales l ON p.id=l.id 
-                        WHERE l.id=$duenio_id ORDER BY p.fecha_inicio DESC");
+                        JOIN locales l ON p.id_local=l.id 
+                        WHERE l.id_duenio=$duenio_id ORDER BY p.fecha_inicio DESC");
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -58,6 +134,13 @@ $promos = $conn->query("SELECT p.*, l.nombre AS local
     <h3>🎟️ Panel de Dueño</h3>
     <a href="../auth/logout.php" class="btn btn-danger">Cerrar sesión</a>
   </div>
+
+  <?php if(isset($success_message)): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      <?= $success_message ?>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  <?php endif; ?>
 
   <!-- INFORMACIÓN DEL DUEÑO -->
   <div class="card mb-4">
@@ -126,18 +209,31 @@ $promos = $conn->query("SELECT p.*, l.nombre AS local
               <label>Descripción:</label>
               <textarea name="descripcion" class="form-control" required></textarea>
             </div>
-            <div class="mb-3">
-              <label>Local:</label>
-              <select name="id" class="form-select" required>
-                <option value="">Seleccionar...</option>
-                <?php
-                $locales->data_seek(0);
-                while($l = $locales->fetch_assoc()):
-                ?>
-                  <option value="<?= $l['id'] ?>"><?= htmlspecialchars($l['nombre']) ?></option>
-                <?php endwhile; ?>
-              </select>
-            </div>
+            
+            <?php if($num_locales == 1): ?>
+              <!-- Si solo tiene un local, mostrar el nombre y pasar el ID oculto -->
+              <div class="mb-3">
+                <label>Local:</label>
+                <input type="text" class="form-control" value="<?= htmlspecialchars($local_unico['nombre']) ?>" disabled>
+                <input type="hidden" name="id_local" value="<?= $local_unico['id'] ?>">
+                <small class="text-muted">Este es tu único local registrado</small>
+              </div>
+            <?php else: ?>
+              <!-- Si tiene múltiples locales, mostrar selector -->
+              <div class="mb-3">
+                <label>Local:</label>
+                <select name="id_local" class="form-select" required>
+                  <option value="">Seleccionar local...</option>
+                  <?php
+                  $locales->data_seek(0);
+                  while($l = $locales->fetch_assoc()):
+                  ?>
+                    <option value="<?= $l['id'] ?>"><?= htmlspecialchars($l['nombre']) ?></option>
+                  <?php endwhile; ?>
+                </select>
+              </div>
+            <?php endif; ?>
+            
             <div class="mb-3">
               <label>Días de vigencia:</label>
               <input type="text" name="dias_vigencia" class="form-control">

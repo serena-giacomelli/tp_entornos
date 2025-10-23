@@ -31,7 +31,6 @@ CREATE TABLE locales (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL,
   rubro VARCHAR(100),
-  codigo VARCHAR(10) UNIQUE,
   id_duenio INT,
   FOREIGN KEY (id_duenio) REFERENCES usuarios(id) ON DELETE SET NULL
 );
@@ -126,10 +125,10 @@ VALUES
 -- =====================================================
 -- LOCALES
 -- =====================================================
-INSERT INTO locales (nombre, rubro, codigo, id_duenio)
+INSERT INTO locales (nombre, rubro, id_duenio)
 VALUES
-('Tienda Moda', 'indumentaria', 'LOC001', 2),
-('Café Central', 'gastronomía', 'LOC002', 3);
+('Tienda Moda', 'indumentaria', 2),
+('Café Central', 'gastronomía', 3);
 
 -- =====================================================
 -- PROMOCIONES

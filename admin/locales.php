@@ -12,10 +12,9 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
 if (isset($_POST['agregar'])) {
     $nombre = trim($_POST['nombre']);
     $rubro = trim($_POST['rubro']);
-    $codigo = trim($_POST['codigo']);
     $duenio_id = intval($_POST['duenio_id']);
 
-    $sql = "INSERT INTO locales (nombre, rubro, codigo, id_duenio) VALUES ('$nombre','$rubro','$codigo',$duenio_id)";
+    $sql = "INSERT INTO locales (nombre, rubro, id_duenio) VALUES ('$nombre','$rubro',$duenio_id)";
     $conn->query($sql);
 }
 
@@ -30,10 +29,27 @@ if (isset($_POST['editar'])) {
     $id = intval($_POST['id']);
     $nombre = trim($_POST['nombre']);
     $rubro = trim($_POST['rubro']);
-    $codigo = trim($_POST['codigo']);
     $duenio_id = intval($_POST['duenio_id']);
-    $conn->query("UPDATE locales SET nombre='$nombre', rubro='$rubro', codigo='$codigo', id_duenio=$duenio_id WHERE id=$id");
+    // No actualizar el código (se mantiene el original)
+    $conn->query("UPDATE locales SET nombre='$nombre', rubro='$rubro', id_duenio=$duenio_id WHERE id=$id");
 }
+
+// Lista de rubros disponibles
+$rubros = [
+    'Indumentaria',
+    'Gastronomía',
+    'Tecnología',
+    'Deportes',
+    'Hogar y Decoración',
+    'Belleza y Salud',
+    'Juguetería',
+    'Librería',
+    'Joyería',
+    'Calzado',
+    'Electrónica',
+    'Supermercado',
+    'Otro'
+];
 
 // Traer todos los locales
 $sql_locales = "SELECT l.*, u.nombre AS duenio 
@@ -69,7 +85,6 @@ $duenios = $conn->query("SELECT id, nombre FROM usuarios WHERE rol='duenio' AND 
         <th>ID</th>
         <th>Nombre</th>
         <th>Rubro</th>
-        <th>Código</th>
         <th>Dueño</th>
         <th>Acciones</th>
       </tr>
@@ -80,7 +95,6 @@ $duenios = $conn->query("SELECT id, nombre FROM usuarios WHERE rol='duenio' AND 
           <td><?= $l['id'] ?></td>
           <td><?= htmlspecialchars($l['nombre']) ?></td>
           <td><?= htmlspecialchars($l['rubro']) ?></td>
-          <td><?= htmlspecialchars($l['codigo']) ?></td>
           <td><?= htmlspecialchars($l['duenio'] ?? '—') ?></td>
           <td>
             <!-- Botón editar -->
@@ -106,11 +120,13 @@ $duenios = $conn->query("SELECT id, nombre FROM usuarios WHERE rol='duenio' AND 
                   </div>
                   <div class="mb-3">
                     <label>Rubro:</label>
-                    <input type="text" name="rubro" value="<?= htmlspecialchars($l['rubro']) ?>" class="form-control" required>
-                  </div>
-                  <div class="mb-3">
-                    <label>Código:</label>
-                    <input type="text" name="codigo" value="<?= htmlspecialchars($l['codigo']) ?>" class="form-control" required>
+                    <select name="rubro" class="form-select" required>
+                      <?php foreach($rubros as $r): ?>
+                        <option value="<?= $r ?>" <?= ($l['rubro'] == $r) ? 'selected' : '' ?>>
+                          <?= $r ?>
+                        </option>
+                      <?php endforeach; ?>
+                    </select>
                   </div>
                   <div class="mb-3">
                     <label>Dueño:</label>
@@ -154,11 +170,12 @@ $duenios = $conn->query("SELECT id, nombre FROM usuarios WHERE rol='duenio' AND 
           </div>
           <div class="mb-3">
             <label>Rubro:</label>
-            <input type="text" name="rubro" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label>Código:</label>
-            <input type="text" name="codigo" class="form-control" required>
+            <select name="rubro" class="form-select" required>
+              <option value="">Seleccionar rubro...</option>
+              <?php foreach($rubros as $r): ?>
+                <option value="<?= $r ?>"><?= $r ?></option>
+              <?php endforeach; ?>
+            </select>
           </div>
           <div class="mb-3">
             <label>Dueño:</label>

@@ -13,7 +13,7 @@ if (isset($_GET['msg']) && $_GET['msg'] == 'duenio_aprobado') {
 }
 
 // Consultar dueños pendientes
-$sql_duenios = "SELECT * FROM usuarios WHERE rol='duenio' AND estado='pendiente'";
+$sql_duenios = "SELECT * FROM usuarios WHERE rol='duenio' AND estado_cuenta='pendiente'";
 $res_duenios = $conn->query($sql_duenios);
 ?>
 <!DOCTYPE html>
