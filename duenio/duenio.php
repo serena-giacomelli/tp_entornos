@@ -87,12 +87,12 @@ if (isset($_POST['agregar_promo'])) {
                 }
 
                 $mail->addAddress($admin['email'], $admin['nombre']);
-                $mail->Subject = '🎟️ Nueva promoción pendiente de aprobación';
+                $mail->Subject = 'Nueva promoción pendiente de aprobación';
                 $mail->Body = "Hola {$admin['nombre']},\n\n" .
                               "Un dueño de local ha creado una nueva promoción que necesita revisión:\n\n" .
-                              "📌 Título: $titulo\n" .
-                              "📝 Descripción: $descripcion\n" .
-                              "📅 Vigencia: del $fecha_inicio al $fecha_fin\n\n" .
+                              "Título: $titulo\n" .
+                              "Descripción: $descripcion\n" .
+                              "Vigencia: del $fecha_inicio al $fecha_fin\n\n" .
                               "Por favor, ingresa al panel de administración para aprobar o rechazar esta promoción.\n\n" .
                               "Atentamente,\n" .
                               "Sistema Ofertópolis";
@@ -125,14 +125,27 @@ $promos = $conn->query("SELECT p.*, l.nombre AS local
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Panel Dueño - Promociones</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Dueño - OFERTÓPOLIS</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="../css/estilos.css" rel="stylesheet">
+<link href="../css/header.css" rel="stylesheet">
+<link href="../css/footer.css" rel="stylesheet">
+<link href="../css/panels.css" rel="stylesheet">
 </head>
-<body class="bg-light">
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>🎟️ Panel de Dueño</h3>
-    <a href="../auth/logout.php" class="btn btn-danger">Cerrar sesión</a>
+<body>
+
+<?php include("../includes/header.php"); ?>
+
+<main id="main-content" class="main-content">
+<div class="container mt-4 mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 style="color: var(--primary-color); font-weight: 700;">Panel de Dueño</h3>
+    <div>
+      <a href="reportes.php" class="btn btn-outline-primary me-2">Ver Reportes</a>
+      <a href="solicitudes.php" class="btn btn-secondary me-2">Solicitudes</a>
+      <a href="../auth/logout.php" class="btn btn-danger">Cerrar sesión</a>
+    </div>
   </div>
 
   <?php if(isset($success_message)): ?>
@@ -142,10 +155,17 @@ $promos = $conn->query("SELECT p.*, l.nombre AS local
     </div>
   <?php endif; ?>
 
+  <?php if(isset($error_message)): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <?= $error_message ?>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  <?php endif; ?>
+
   <!-- INFORMACIÓN DEL DUEÑO -->
-  <div class="card mb-4">
-    <div class="card-header bg-primary text-white">
-      <h5 class="mb-0">👤 Información del Dueño</h5>
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header text-white" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));">
+      <h5 class="mb-0">Información del Dueño</h5>
     </div>
     <div class="card-body">
       <div class="row">
@@ -154,66 +174,98 @@ $promos = $conn->query("SELECT p.*, l.nombre AS local
           <p><strong>Email:</strong> <?= htmlspecialchars($duenio['email']) ?></p>
         </div>
         <div class="col-md-6">
-          <p><strong>Rol:</strong> <span class="badge bg-success">Dueño de Local</span></p>
-          <p><strong>Total de Locales:</strong> <?= $count_locales['total'] ?></p>
+          <p><strong>Rol:</strong> <span class="badge" style="background-color: var(--secondary-color); color: var(--dark);">Dueño de Local</span></p>
+          <p><strong>Total de Locales:</strong> <span class="badge bg-primary"><?= $count_locales['total'] ?></span></p>
         </div>
       </div>
     </div>
   </div>
 
-  <h4 class="mb-3">🎟️ Mis Promociones</h4>
-  <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalAgregar">➕ Nueva Promoción</button>
-
-  <table class="table table-bordered">
-    <thead class="table-dark">
-      <tr>
-        <th>ID</th>
-        <th>Título</th>
-        <th>Descripción</th>
-        <th>Local</th>
-        <th>Estado</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
+  <!-- Sección de Promociones -->
+  <div class="card shadow-sm">
+    <div class="card-header text-white" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Mis Promociones</h5>
+        <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalAgregar">
+          Nueva Promoción
+        </button>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead style="background-color: var(--light);">
+            <tr>
+              <th>ID</th>
+              <th>Título</th>
+              <th>Descripción</th>
+              <th>Local</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+          <tbody>
       <?php while($p = $promos->fetch_assoc()): ?>
       <tr>
-        <td><?= $p['id'] ?></td>
+        <td><strong>#<?= $p['id'] ?></strong></td>
         <td><?= htmlspecialchars($p['titulo']) ?></td>
         <td><?= htmlspecialchars($p['descripcion']) ?></td>
         <td><?= htmlspecialchars($p['local']) ?></td>
-        <td><?= $p['estado'] ?></td>
         <td>
-          <a href="?eliminar=<?= $p['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar esta promoción?')">🗑️</a>
+          <?php if($p['estado'] == 'pendiente'): ?>
+            <span class="badge bg-warning text-dark">Pendiente</span>
+          <?php elseif($p['estado'] == 'aprobada'): ?>
+            <span class="badge bg-success">Aprobada</span>
+          <?php elseif($p['estado'] == 'rechazada'): ?>
+            <span class="badge bg-danger">Rechazada</span>
+          <?php endif; ?>
+        </td>
+        <td>
+          <a href="?eliminar=<?= $p['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar esta promoción?')">
+            Eliminar
+          </a>
         </td>
       </tr>
       <?php endwhile; ?>
     </tbody>
-  </table>
+        </table>
+      </div>
+    </div>
+  </div>
 
-  <!-- Modal agregar promoción -->
-  <div class="modal fade" id="modalAgregar" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <form method="POST">
-          <div class="modal-header">
-            <h5 class="modal-title">Nueva Promoción</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+  </div>
+
+</div>
+</main>
+
+<!-- Modal agregar promoción -->
+<div class="modal fade" id="modalAgregar" tabindex="-1" aria-labelledby="modalAgregarLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header text-white" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));">
+        <h5 class="modal-title" id="modalAgregarLabel">Nueva Promoción</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <form method="POST">
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-12 mb-3">
+              <label class="form-label fw-bold">Título:</label>
+              <input type="text" name="titulo" class="form-control" placeholder="Ej: 2x1 en pizzas" required>
+            </div>
           </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label>Título:</label>
-              <input type="text" name="titulo" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label>Descripción:</label>
-              <textarea name="descripcion" class="form-control" required></textarea>
-            </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold">Descripción:</label>
+            <textarea name="descripcion" class="form-control" rows="3" placeholder="Describe los detalles de la promoción..." required></textarea>
+          </div>
+          </div>
             
             <?php if($num_locales == 1): ?>
               <!-- Si solo tiene un local, mostrar el nombre y pasar el ID oculto -->
               <div class="mb-3">
-                <label>Local:</label>
+                <label class="form-label fw-bold">Local:</label>
                 <input type="text" class="form-control" value="<?= htmlspecialchars($local_unico['nombre']) ?>" disabled>
                 <input type="hidden" name="id_local" value="<?= $local_unico['id'] ?>">
                 <small class="text-muted">Este es tu único local registrado</small>
@@ -221,7 +273,7 @@ $promos = $conn->query("SELECT p.*, l.nombre AS local
             <?php else: ?>
               <!-- Si tiene múltiples locales, mostrar selector -->
               <div class="mb-3">
-                <label>Local:</label>
+                <label class="form-label fw-bold">Local:</label>
                 <select name="id_local" class="form-select" required>
                   <option value="">Seleccionar local...</option>
                   <?php
@@ -234,25 +286,38 @@ $promos = $conn->query("SELECT p.*, l.nombre AS local
               </div>
             <?php endif; ?>
             
-            <div class="mb-3">
-              <label>Días de vigencia:</label>
-              <input type="text" name="dias_vigencia" class="form-control">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Días de vigencia:</label>
+                <input type="text" name="dias_vigencia" class="form-control" placeholder="Ej: lunes, martes, miércoles">
+                <small class="text-muted">Opcional</small>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Categoría mínima:</label>
+                <select name="categoria_minima" class="form-select" required>
+                  <option value="">Seleccionar categoría...</option>
+                  <option value="inicial">Inicial</option>
+                  <option value="medium">Medium</option>
+                  <option value="premium">Premium</option>
+                </select>
+                <small class="text-muted">Los clientes de esta categoría o superior podrán verla</small>
+              </div>
             </div>
-            <div class="mb-3">
-              <label>Categoría mínima:</label>
-              <input type="text" name="categoria_minima" class="form-control">
-            </div>
-            <div class="mb-3">
-              <label>Fecha inicio:</label>
-              <input type="date" name="fecha_inicio" class="form-control">
-            </div>
-            <div class="mb-3">
-              <label>Fecha fin:</label>
-              <input type="date" name="fecha_fin" class="form-control">
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Fecha inicio:</label>
+                <input type="date" name="fecha_inicio" class="form-control" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Fecha fin:</label>
+                <input type="date" name="fecha_fin" class="form-control" required>
+              </div>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="submit" name="agregar_promo" class="btn btn-primary">Agregar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" name="agregar_promo" class="btn btn-primary">Crear Promoción</button>
           </div>
         </form>
       </div>
@@ -260,6 +325,10 @@ $promos = $conn->query("SELECT p.*, l.nombre AS local
   </div>
 
 </div>
+</main>
+
+<?php include("../includes/footer.php"); ?>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

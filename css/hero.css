@@ -1,0 +1,81 @@
+/* ============================================
+   HERO CAROUSEL SECTION - hero.css
+   ============================================ */
+
+.hero-carousel-section {
+  margin-bottom: var(--spacing-lg);
+  border-radius: 0; /* Bordes rectos */
+  overflow: hidden;
+  box-shadow: none;
+}
+
+#heroCarousel {
+  position: relative;
+  height: 450px;
+}
+
+.hero-carousel-img {
+  height: 450px;
+  object-fit: cover;
+}
+
+/* Controles del carousel - Ocultos */
+#heroCarousel .carousel-control-prev,
+#heroCarousel .carousel-control-next {
+  display: none;
+}
+
+/* Indicadores - Ocultos */
+#heroCarousel .carousel-indicators {
+  display: none;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 992px) {
+  #heroCarousel {
+    height: 400px;
+  }
+
+  .hero-carousel-img {
+    height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  #heroCarousel {
+    height: 350px;
+  }
+
+  .hero-carousel-img {
+    height: 350px;
+  }
+
+  #heroCarousel .carousel-control-prev,
+  #heroCarousel .carousel-control-next {
+    width: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  #heroCarousel {
+    height: 300px;
+  }
+
+  .hero-carousel-img {
+    height: 300px;
+  }
+
+  #heroCarousel .carousel-control-prev-icon,
+  #heroCarousel .carousel-control-next-icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  #heroCarousel .carousel-indicators button {
+    width: 10px;
+    height: 10px;
+  }
+}

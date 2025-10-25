@@ -1,0 +1,120 @@
+/* ============================================
+   CARDS - cards.css
+   ============================================ */
+
+.card-custom {
+  background: var(--white);
+  border-radius: var(--border-radius-lg);
+  box-shadow: none;
+  padding: var(--spacing-md);
+  height: 100%;
+  border: 1px solid transparent;
+}
+
+.card-custom:hover {
+  box-shadow: none;
+  border-color: var(--primary-light);
+}
+
+.card-header-custom {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: var(--white);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  margin: calc(var(--spacing-md) * -1) calc(var(--spacing-md) * -1) var(--spacing-md);
+}
+
+.card-title-custom {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin: 0;
+}
+
+.card-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin-left: var(--spacing-xs);
+}
+
+.card-title-promo {
+  font-size: 1.3rem;
+  color: var(--primary-color);
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.card-info-label {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.card-info-value {
+  color: var(--dark);
+  font-weight: 500;
+}
+
+/* Estilos para novedades */
+.novedad-title {
+  font-size: 1.1rem;
+  color: var(--dark);
+  font-weight: 700;
+  margin-bottom: 0;
+}
+
+.novedad-date {
+  font-size: 0.875rem;
+  color: var(--gray);
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.novedad-content {
+  margin-bottom: 0;
+  line-height: 1.6;
+}
+
+/* Títulos de secciones */
+.section-title {
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+/* Estilos para Carouseles */
+.carousel-control-prev,
+.carousel-control-next {
+  width: 5%;
+  opacity: 0.8;
+}
+
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+  opacity: 1;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: var(--primary-color);
+  border-radius: 50%;
+  padding: 20px;
+}
+
+.carousel-indicators button {
+  background-color: var(--primary-color);
+}
+
+.carousel-item {
+  padding: 10px 0;
+  min-height: 400px;
+}
+
+/* Responsive adjustments for carousel */
+@media (max-width: 768px) {
+  .carousel-item {
+    min-height: 350px;
+  }
+}

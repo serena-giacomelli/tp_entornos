@@ -30,6 +30,7 @@ CREATE TABLE usuarios (
 CREATE TABLE locales (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(100) NOT NULL,
+  ubicacion VARCHAR(50),
   rubro VARCHAR(100),
   id_duenio INT,
   FOREIGN KEY (id_duenio) REFERENCES usuarios(id) ON DELETE SET NULL
@@ -125,10 +126,18 @@ VALUES
 -- =====================================================
 -- LOCALES
 -- =====================================================
-INSERT INTO locales (nombre, rubro, id_duenio)
+INSERT INTO locales (nombre, ubicacion, rubro, id_duenio)
 VALUES
-('Tienda Moda', 'indumentaria', 2),
-('Café Central', 'gastronomía', 3);
+('Tienda Moda', 'Planta Baja - Local 12', 'indumentaria', 2),
+('Café Central', 'Primer Piso - Local 45', 'gastronomía', 3),
+('Librería Cultural', 'Planta Baja - Local 8', 'librería', NULL),
+('Tech Store', 'Primer Piso - Local 23', 'tecnología', NULL),
+('Zapatería Premium', 'Planta Baja - Local 15', 'calzado', NULL),
+('Heladería Italiana', 'Planta Baja - Local 5', 'gastronomía', NULL),
+('Joyería Elegance', 'Primer Piso - Local 34', 'joyería', NULL),
+('Perfumería Aromas', 'Planta Baja - Local 18', 'perfumería', NULL),
+('Deportes Total', 'Segundo Piso - Local 56', 'deportes', NULL),
+('Juguetería Mágica', 'Segundo Piso - Local 62', 'juguetería', NULL);
 
 -- =====================================================
 -- PROMOCIONES
@@ -138,7 +147,15 @@ VALUES
 (1, '2x1 en jeans', 'Llevá dos jeans y pagá uno. Válido lunes a miércoles.', '2025-10-01', '2025-12-31', 'lunes,martes,miércoles', 'inicial', 'aprobada'),
 (1, '20% en remeras', 'Descuento del 20% en remeras para clientes Medium y Premium.', '2025-10-15', '2025-12-31', 'todos', 'medium', 'aprobada'),
 (2, 'Café + medialuna $1200', 'Promo desayuno. Todos los días de 8 a 11.', '2025-10-01', '2025-12-31', 'lunes,martes,miércoles,jueves,viernes', 'inicial', 'aprobada'),
-(2, '3x2 en tortas', 'Pagás dos tortas y te llevás tres.', '2025-10-20', '2025-11-30', 'viernes,sábado,domingo', 'premium', 'pendiente');
+(2, '3x2 en tortas', 'Pagás dos tortas y te llevás tres.', '2025-10-20', '2025-11-30', 'viernes,sábado,domingo', 'premium', 'pendiente'),
+(3, '15% en libros', 'Descuento en toda la librería por el mes del libro.', '2025-10-25', '2025-11-30', 'todos', 'inicial', 'aprobada'),
+(4, 'Black Friday Tech', '30% en celulares y tablets seleccionados.', '2025-11-29', '2025-11-30', 'viernes,sábado', 'medium', 'aprobada'),
+(5, '2x1 en zapatillas', 'Compra dos pares de zapatillas por el precio de uno.', '2025-10-20', '2025-12-15', 'todos', 'inicial', 'aprobada'),
+(6, 'Helado gratis', 'Comprá 1kg de helado y llevá 1/2kg gratis.', '2025-10-15', '2025-11-15', 'todos', 'inicial', 'aprobada'),
+(7, '20% en joyas', 'Descuento especial en toda la joyería.', '2025-10-10', '2025-12-24', 'todos', 'premium', 'aprobada'),
+(8, '3x2 en perfumes', 'Llevá tres perfumes y pagá dos.', '2025-10-01', '2025-12-31', 'todos', 'medium', 'aprobada'),
+(9, '40% en ropa deportiva', 'Gran descuento en indumentaria deportiva.', '2025-11-01', '2025-11-30', 'todos', 'inicial', 'aprobada'),
+(10, 'Juguetes 2x1', 'Comprá dos juguetes y pagá uno.', '2025-11-15', '2025-12-24', 'todos', 'inicial', 'aprobada');
 
 -- =====================================================
 -- SOLICITUDES
@@ -156,4 +173,11 @@ INSERT INTO novedades (titulo, contenido, categoria_destino, fecha_vencimiento)
 VALUES
 ('Nuevo horario del shopping', 'A partir de noviembre, abrimos de 9 a 22 hs todos los días.', 'inicial', '2025-12-31'),
 ('Evento de black friday', 'Descuentos especiales en todos los locales este viernes 29.', 'medium', '2025-11-30'),
-('Exclusivo premium night', 'Acceso anticipado a las mejores ofertas solo para usuarios premium.', 'premium', '2025-11-15');
+('Exclusivo premium night', 'Acceso anticipado a las mejores ofertas solo para usuarios premium.', 'premium', '2025-11-15'),
+('Estacionamiento gratuito', 'Durante todo octubre, estacionamiento sin cargo para clientes.', 'inicial', '2025-10-31'),
+('Sorteo mensual', 'Participá del sorteo de $50.000 en compras. Válido para clientes Medium y Premium.', 'medium', '2025-11-20'),
+('Nuevo local de tecnología', 'Tech Store ya está abierto en el Primer Piso. Visitanos!', 'inicial', NULL),
+('Cyber Monday', 'Ofertas exclusivas online y en tienda este lunes 2 de diciembre.', 'inicial', '2025-12-02'),
+('Beneficios Premium', 'Los clientes Premium ahora tienen 10% adicional en todos los locales.', 'premium', NULL),
+('Zona infantil renovada', 'Nueva área de juegos para niños en la Planta Baja.', 'inicial', NULL),
+('Horario especial festivos', 'Durante diciembre abrimos de 10 a 23 hs todos los días.', 'inicial', '2025-12-31');

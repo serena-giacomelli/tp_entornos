@@ -1,16 +1,45 @@
-<section class="bg-primary text-white text-center py-5">
-  <div class="container">
-    <h1 class="display-5 fw-bold">Bienvenido a Ofertópolis</h1>
-    <p class="lead">Descubrí promociones, novedades y beneficios exclusivos.</p>
-    <?php if (!isset($_SESSION['usuario_rol'])): ?>
-      <a href="/tp_eg/auth/login.php" class="btn btn-light btn-lg me-2">Iniciar sesión</a>
-      <a href="/tp_eg/auth/register.php" class="btn btn-outline-light btn-lg">Registrarse</a>
-    <?php else: ?>
-      <a href="<?php
-        if ($_SESSION['usuario_rol'] == 'admin') echo '/tp_eg/admin/admin.php';
-        elseif ($_SESSION['usuario_rol'] == 'duenio') echo '/tp_eg/duenio/duenio.php';
-        else echo '/tp_eg/cliente/cliente.php';
-      ?>" class="btn btn-light btn-lg">Ir a mi panel</a>
-    <?php endif; ?>
+<?php
+// Definir las imágenes estáticas del carousel
+$imagenes_hero = [
+    '/tp_eg/imagenes/img1.jpg',
+    '/tp_eg/imagenes/img2.jpg',
+    '/tp_eg/imagenes/img3.jpg'
+];
+?>
+
+<section class="hero-carousel-section fade-in" role="banner">
+  <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000" data-bs-pause="false">
+    
+    <!-- Indicadores -->
+    <div class="carousel-indicators">
+      <?php foreach ($imagenes_hero as $index => $imagen): ?>
+        <button type="button" 
+                data-bs-target="#heroCarousel" 
+                data-bs-slide-to="<?php echo $index; ?>" 
+                <?php echo $index === 0 ? 'class="active" aria-current="true"' : ''; ?>
+                aria-label="Slide <?php echo $index + 1; ?>">
+        </button>
+      <?php endforeach; ?>
+    </div>
+
+    <!-- Slides -->
+    <div class="carousel-inner">
+      <?php foreach ($imagenes_hero as $index => $imagen): ?>
+        <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?>">
+          <img src="<?php echo $imagen; ?>" class="d-block w-100 hero-carousel-img" alt="Imagen <?php echo $index + 1; ?>">
+        </div>
+      <?php endforeach; ?>
+    </div>
+
+    <!-- Controles -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Anterior</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Siguiente</span>
+    </button>
+    
   </div>
 </section>

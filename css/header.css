@@ -1,0 +1,342 @@
+
+.header-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 120px !important;
+  background: var(--white);
+  box-shadow: var(--shadow-md);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spacing-md);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Menú hamburguesa */
+.menu-toggle {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  color: var(--dark);
+  transition: transform var(--transition-speed);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--border-radius);
+}
+
+.menu-toggle:hover {
+  background-color: var(--light);
+  transform: scale(1.1);
+}
+
+.menu-toggle:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Logo central */
+.logo-central {
+  font-size: 72px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--dark);
+  text-decoration: none;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: color var(--transition-speed);
+}
+
+.logo-central:hover {
+  color: var(--primary-color);
+}
+
+/* Perfil de usuario */
+.user-profile {
+  position: relative;
+}
+
+.profile-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: 50px;
+  transition: all var(--transition-speed);
+}
+
+.profile-button:hover {
+  background-color: var(--light);
+}
+
+.profile-button:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.profile-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-right: var(--spacing-xs);
+}
+
+.profile-name {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.profile-role {
+  font-size: 12px;
+  color: var(--gray);
+  text-transform: uppercase;
+}
+
+.dropdown-icon {
+  font-size: 12px;
+  color: var(--gray);
+  transition: transform var(--transition-speed);
+}
+
+.profile-button.active .dropdown-icon {
+  transform: rotate(180deg);
+}
+
+/* Dropdown de perfil */
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  min-width: 200px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all var(--transition-speed);
+  z-index: 1001;
+}
+
+.profile-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  color: var(--dark);
+  text-decoration: none;
+  transition: background-color var(--transition-speed);
+  border-bottom: 1px solid var(--light);
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background-color: var(--light);
+}
+
+.dropdown-item.danger {
+  color: var(--danger-color);
+}
+
+.dropdown-item.danger:hover {
+  background-color: #FFEBEE;
+}
+
+/* ============================================
+   MENÚ LATERAL (SIDEBAR)
+   ============================================ */
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-speed);
+}
+
+.sidebar-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  background: var(--white);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  transform: translateX(-100%);
+  transition: transform var(--transition-speed);
+  overflow-y: auto;
+}
+
+.sidebar.show {
+  transform: translateX(0);
+}
+
+.sidebar-header {
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar-logo {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary-color);
+  letter-spacing: 1px;
+}
+
+.sidebar-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--gray);
+  padding: var(--spacing-xs);
+  transition: color var(--transition-speed);
+}
+
+.sidebar-close:hover {
+  color: var(--dark);
+}
+
+.sidebar-nav {
+  padding: var(--spacing-md) 0;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  color: var(--dark);
+  text-decoration: none;
+  transition: all var(--transition-speed);
+  border-left: 3px solid transparent;
+}
+
+.sidebar-nav-item:hover {
+  background-color: var(--light);
+  border-left-color: var(--primary-color);
+}
+
+.sidebar-nav-item.active {
+  background-color: var(--primary-light);
+  border-left-color: var(--primary-color);
+  font-weight: 600;
+}
+
+.sidebar-nav-icon {
+  font-size: 20px;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--gray-light);
+  margin: var(--spacing-md) var(--spacing-lg);
+}
+
+.sidebar-nav-logout {
+  color: var(--danger-color);
+}
+
+.btn-login-header {
+  text-decoration: none;
+}
+
+/* Skip to main content link (Accesibilidad) */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--primary-color);
+  color: var(--white);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  z-index: 100;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .header-fixed {
+    height: 100px !important;
+  }
+  
+  .logo-central {
+    font-size: 48px;
+    letter-spacing: 1px;
+  }
+  
+  .profile-info {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-fixed {
+    height: 80px !important;
+  }
+  
+  .logo-central {
+    font-size: 36px;
+  }
+}

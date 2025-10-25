@@ -11,8 +11,13 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Reportes - Administración</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="../css/estilos.css" rel="stylesheet">
+<link href="../css/header.css" rel="stylesheet">
+<link href="../css/footer.css" rel="stylesheet">
+<link href="../css/panels.css" rel="stylesheet">
 <style>
   .progress {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -52,15 +57,21 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
   }
 </style>
 </head>
-<body class="bg-light">
-<div class="container mt-4">
-  <h2 class="mb-4">📈 Reportes Gerenciales</h2>
-  <a href="admin.php" class="btn btn-secondary mb-3">⬅ Volver al panel</a>
+<body>
+
+<?php include("../includes/header.php"); ?>
+
+<main id="main-content" class="main-content">
+<div class="container mt-4 mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 style="color: var(--primary-color); font-weight: 700;">Reportes Gerenciales</h2>
+    <a href="admin.php" class="btn btn-secondary">Volver al Panel</a>
+  </div>
 
   <!-- Reporte 1: Promociones por local -->
-  <div class="card mb-4">
-    <div class="card-header bg-dark text-white">
-      <h5 class="mb-0">📊 Promociones por Local</h5>
+  <div class="card mt-4 shadow-sm">
+    <div class="card-header text-white" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));">
+      <h5 class="mb-0">Promociones por Local</h5>
     </div>
     <div class="card-body">
       <?php
@@ -87,7 +98,7 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
       ?>
         <div class="mb-4">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="mb-0"><strong>🏪 <?= htmlspecialchars($row['nombre']) ?></strong></h6>
+            <h6 class="mb-0"><strong><?= htmlspecialchars($row['nombre']) ?></strong></h6>
             <span class="badge bg-secondary"><?= $total ?> total</span>
           </div>
           
@@ -121,9 +132,9 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
           </div>
           
           <small class="text-muted">
-            <span class="badge bg-success">✅ <?= $aprobadas ?></span>
-            <span class="badge bg-warning">⏳ <?= $pendientes ?></span>
-            <span class="badge bg-danger">❌ <?= $rechazadas ?></span>
+            <span class="badge bg-success"><?= $aprobadas ?> aprobadas</span>
+            <span class="badge bg-warning"><?= $pendientes ?> pendientes</span>
+            <span class="badge bg-danger"><?= $rechazadas ?> rechazadas</span>
           </small>
         </div>
       <?php endwhile; ?>
@@ -131,9 +142,9 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
   </div>
 
   <!-- Reporte 2: Uso de promociones por cliente -->
-  <div class="card mb-4">
-    <div class="card-header bg-primary text-white">
-      <h5 class="mb-0">👥 Uso de Promociones por Cliente</h5>
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header text-white" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));">
+      <h5 class="mb-0">Uso de Promociones por Cliente</h5>
     </div>
     <div class="card-body">
       <?php
@@ -166,7 +177,7 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
         <div class="mb-3">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div>
-              <strong>👤 <?= htmlspecialchars($row['nombre']) ?></strong>
+              <strong><?= htmlspecialchars($row['nombre']) ?></strong>
               <span class="badge <?= $badge_color ?> ms-2"><?= strtoupper($row['categoria']) ?></span>
             </div>
             <small class="text-muted"><?= $total ?> solicitudes</small>
@@ -184,7 +195,7 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
           </div>
           
           <?php if ($rechazadas > 0): ?>
-            <small class="text-danger">❌ <?= $rechazadas ?> rechazadas</small>
+            <small class="text-danger"><?= $rechazadas ?> rechazadas</small>
           <?php endif; ?>
         </div>
       <?php endwhile; ?>
@@ -196,9 +207,9 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
   </div>
 
   <!-- Reporte 3: Categorías de clientes -->
-  <div class="card mb-4">
-    <div class="card-header bg-success text-white">
-      <h5 class="mb-0">🏆 Distribución de Categorías de Clientes</h5>
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header text-white" style="background: linear-gradient(135deg, #28a745, #1e7e34);">
+      <h5 class="mb-0">Distribución de Categorías de Clientes</h5>
     </div>
     <div class="card-body">
       <?php
@@ -218,17 +229,16 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
         $cantidad = $row['cantidad'];
         $porcentaje = ($total_clientes > 0) ? round(($cantidad / $total_clientes) * 100) : 0;
         
-        // Color y emoji según categoría
+        // Color según categoría
         $datos_categoria = match($row['categoria']) {
-            'premium' => ['color' => 'warning', 'emoji' => '👑', 'texto' => 'Premium'],
-            'medium' => ['color' => 'info', 'emoji' => '⭐', 'texto' => 'Medium'],
-            default => ['color' => 'secondary', 'emoji' => '🎫', 'texto' => 'Inicial']
+            'premium' => ['color' => 'warning', 'texto' => 'Premium'],
+            'medium' => ['color' => 'info', 'texto' => 'Medium'],
+            default => ['color' => 'secondary', 'texto' => 'Inicial']
         };
       ?>
         <div class="mb-3">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <h6 class="mb-0">
-              <?= $datos_categoria['emoji'] ?> 
               <strong><?= $datos_categoria['texto'] ?></strong>
             </h6>
             <span class="badge bg-<?= $datos_categoria['color'] ?> text-dark">
@@ -255,9 +265,9 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
   </div>
 
   <!-- Reporte 4: Locales más activos -->
-  <div class="card mb-5">
-    <div class="card-header bg-info text-white">
-      <h5 class="mb-0">🔥 Locales Más Activos (Top 10)</h5>
+  <div class="card mb-5 shadow-sm">
+    <div class="card-header text-white" style="background: linear-gradient(135deg, #17a2b8, #117a8b);">
+      <h5 class="mb-0">Locales Más Activos (Top 10)</h5>
       <small>Promociones aceptadas por clientes</small>
     </div>
     <div class="card-body">
@@ -286,13 +296,8 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
         $usos = $row['totalUsos'];
         $porcentaje = ($max_usos > 0) ? round(($usos / $max_usos) * 100) : 0;
         
-        // Medalla para los primeros 3
-        $medalla = match($posicion) {
-            1 => '🥇',
-            2 => '🥈',
-            3 => '🥉',
-            default => "#{$posicion}"
-        };
+        // Posición
+        $posicion_texto = "#{$posicion}";
         
         // Color degradado según posición
         $color = match(true) {
@@ -304,7 +309,7 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
         <div class="mb-3">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <div>
-              <span class="me-2"><?= $medalla ?></span>
+              <span class="me-2 fw-bold"><?= $posicion_texto ?></span>
               <strong><?= htmlspecialchars($row['nombre']) ?></strong>
             </div>
             <span class="badge bg-<?= $color ?>"><?= $usos ?> usos</span>
@@ -331,5 +336,10 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
     </div>
   </div>
 </div>
+</main>
+
+<?php include("../includes/footer.php"); ?>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

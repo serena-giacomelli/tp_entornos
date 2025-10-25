@@ -15,6 +15,13 @@ $result_cliente = $conn->query("SELECT categoria FROM usuarios WHERE id=$id_clie
 $cliente = $result_cliente->fetch_assoc();
 $categoria = $cliente['categoria'];
 
+// --- BUSCAR POR CÓDIGO DE LOCAL ---
+$filtro_local = "";
+if (isset($_GET['codigo_local']) && !empty($_GET['codigo_local'])) {
+    $codigo = intval($_GET['codigo_local']);
+    $filtro_local = " AND l.id = $codigo";
+}
+
 // --- SOLICITAR PROMOCIÓN ---
 if (isset($_POST['solicitar'])) {
     $id_promo = intval($_POST['id_promo']);
@@ -47,7 +54,7 @@ if (isset($_POST['solicitar'])) {
 <body class="bg-light">
 <div class="container mt-4 mb-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h3>🎁 Promociones Disponibles</h3>
+    <h3>Promociones Disponibles</h3>
     <div>
       <a href="cliente.php" class="btn btn-secondary">← Volver</a>
       <a href="../auth/logout.php" class="btn btn-danger">Cerrar sesión</a>
@@ -83,12 +90,21 @@ if (isset($_POST['solicitar'])) {
     </div>
     <div class="card-body">
       <form method="GET" class="row g-3">
-        <div class="col-md-5">
-          <label class="form-label">Buscar por título o descripción:</label>
+        <div class="col-md-3">
+          <label class="form-label">📍 Código de Local (ID):</label>
+          <input type="number" 
+                 name="codigo_local" 
+                 class="form-control" 
+                 placeholder="Ej: 1, 2, 3..." 
+                 value="<?= htmlspecialchars($_GET['codigo_local'] ?? '') ?>">
+          <small class="text-muted">Ingresa el ID del local</small>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Buscar por título:</label>
           <input type="text" 
                  name="buscar" 
                  class="form-control" 
-                 placeholder="Ej: descuento, 2x1, buffet..." 
+                 placeholder="Ej: descuento, 2x1..." 
                  value="<?= htmlspecialchars($_GET['buscar'] ?? '') ?>">
         </div>
         <div class="col-md-3">
@@ -107,19 +123,10 @@ if (isset($_POST['solicitar'])) {
             <?php endwhile; ?>
           </select>
         </div>
-        <div class="col-md-2">
-          <label class="form-label">Categoría:</label>
-          <select name="categoria" class="form-select">
-            <option value="">Todas</option>
-            <option value="inicial" <?= (isset($_GET['categoria']) && $_GET['categoria'] == 'inicial') ? 'selected' : '' ?>>Inicial</option>
-            <option value="medium" <?= (isset($_GET['categoria']) && $_GET['categoria'] == 'medium') ? 'selected' : '' ?>>Medium</option>
-            <option value="premium" <?= (isset($_GET['categoria']) && $_GET['categoria'] == 'premium') ? 'selected' : '' ?>>Premium</option>
-          </select>
-        </div>
-        <div class="col-md-2 d-flex align-items-end">
+        <div class="col-md-3 d-flex align-items-end">
           <div class="btn-group w-100">
             <button type="submit" class="btn btn-primary">Filtrar</button>
-            <?php if (!empty($_GET['buscar']) || !empty($_GET['rubro']) || !empty($_GET['categoria'])): ?>
+            <?php if (!empty($_GET['buscar']) || !empty($_GET['rubro']) || !empty($_GET['codigo_local'])): ?>
               <a href="promociones.php" class="btn btn-secondary">Limpiar</a>
             <?php endif; ?>
           </div>
@@ -133,6 +140,12 @@ if (isset($_POST['solicitar'])) {
   $filtro = "";
   $params_filtro = [];
 
+  if (!empty($_GET['codigo_local'])) {
+      $codigo = intval($_GET['codigo_local']);
+      $filtro .= " AND l.id=$codigo";
+      $params_filtro[] = "Local ID: '<strong>$codigo</strong>'";
+  }
+
   if (!empty($_GET['buscar'])) {
       $texto = $conn->real_escape_string($_GET['buscar']);
       $filtro .= " AND (p.titulo LIKE '%$texto%' OR p.descripcion LIKE '%$texto%')";
@@ -145,12 +158,6 @@ if (isset($_POST['solicitar'])) {
       $params_filtro[] = "rubro: '<strong>$rubro</strong>'";
   }
 
-  if (!empty($_GET['categoria'])) {
-      $cat_filtro = $conn->real_escape_string($_GET['categoria']);
-      $filtro .= " AND p.categoria_minima='$cat_filtro'";
-      $params_filtro[] = "categoría: '<strong>$cat_filtro</strong>'";
-  }
-
   // Mostrar filtros activos
   if (!empty($params_filtro)): ?>
     <div class="alert alert-success" role="alert">
@@ -161,7 +168,7 @@ if (isset($_POST['solicitar'])) {
   <?php
   // Consulta con filtros y validación de categoría
   $sql = "SELECT p.id, p.titulo, p.descripcion, p.fecha_inicio, p.fecha_fin, 
-                 p.categoria_minima, l.nombre AS local, l.rubro
+                 p.categoria_minima, l.nombre AS local, l.ubicacion, l.rubro
           FROM promociones p 
           JOIN locales l ON p.id_local = l.id
           WHERE p.estado='aprobada' $filtro
@@ -189,18 +196,23 @@ if (isset($_POST['solicitar'])) {
             </div>
             <div class="card-body">
               <p class="mb-2">
-                <strong>🏪 Local:</strong> <?= htmlspecialchars($p['local']) ?>
+                <strong>Local:</strong> <?= htmlspecialchars($p['local']) ?>
                 <?php if (!empty($p['rubro'])): ?>
                   <span class="badge bg-info"><?= htmlspecialchars($p['rubro']) ?></span>
                 <?php endif; ?>
               </p>
+              <?php if (!empty($p['ubicacion'])): ?>
+                <p class="mb-2">
+                  <strong>Ubicación:</strong> <small class="text-muted"><?= htmlspecialchars($p['ubicacion']) ?></small>
+                </p>
+              <?php endif; ?>
               <p class="mb-2">
-                <strong>📝 Descripción:</strong><br>
+                <strong>Descripción:</strong><br>
                 <?= htmlspecialchars($p['descripcion']) ?>
               </p>
               <?php if (!empty($p['fecha_inicio']) && !empty($p['fecha_fin'])): ?>
                 <p class="mb-2">
-                  <strong>📅 Vigencia:</strong><br>
+                  <strong>Vigencia:</strong><br>
                   <small class="text-muted">
                     Del <?= date('d/m/Y', strtotime($p['fecha_inicio'])) ?> 
                     al <?= date('d/m/Y', strtotime($p['fecha_fin'])) ?>
@@ -208,7 +220,7 @@ if (isset($_POST['solicitar'])) {
                 </p>
               <?php endif; ?>
               <p class="mb-3">
-                <strong>🏆 Categoría mínima:</strong>
+                <strong>Categoría mínima:</strong>
                 <span class="badge bg-warning text-dark"><?= strtoupper($p['categoria_minima']) ?></span>
               </p>
             </div>
@@ -221,7 +233,7 @@ if (isset($_POST['solicitar'])) {
                 <form method="POST" class="m-0">
                   <input type="hidden" name="id_promo" value="<?= $p['id'] ?>">
                   <button type="submit" name="solicitar" class="btn btn-success w-100" onclick="return confirm('¿Deseas solicitar esta promoción?')">
-                    🎁 Solicitar Promoción
+                    Solicitar Promoción
                   </button>
                 </form>
               <?php endif; ?>
@@ -232,7 +244,7 @@ if (isset($_POST['solicitar'])) {
     <?php else: ?>
       <div class="col-12">
         <div class="alert alert-warning text-center" role="alert">
-          <h5>😕 No se encontraron promociones</h5>
+          <h5>No se encontraron promociones</h5>
           <p>No hay promociones que coincidan con los filtros seleccionados o tu categoría actual.</p>
           <?php if (!empty($params_filtro)): ?>
             <a href="promociones.php" class="btn btn-primary">Ver todas las promociones disponibles</a>

@@ -1,0 +1,207 @@
+/* ============================================
+   UTILIDADES - utilities.css
+   Clases auxiliares y helpers
+   ============================================ */
+
+/* Espaciado */
+.mt-custom {
+  margin-top: var(--spacing-lg);
+}
+
+.mb-custom {
+  margin-bottom: var(--spacing-lg);
+}
+
+.section-spacing {
+  padding: var(--spacing-xl) 0;
+}
+
+/* Contenedores */
+.container-custom {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md);
+}
+
+/* Colores de texto */
+.text-primary-custom {
+  color: var(--primary-color);
+}
+
+.text-secondary-custom {
+  color: var(--secondary-color);
+}
+
+.text-success-custom {
+  color: var(--success-color);
+}
+
+.text-danger-custom {
+  color: var(--danger-color);
+}
+
+.text-warning-custom {
+  color: var(--warning-color);
+}
+
+.text-info-custom {
+  color: var(--info-color);
+}
+
+.text-contrast {
+  color: var(--dark);
+  font-weight: 500;
+}
+
+/* Fondos */
+.bg-primary-custom {
+  background-color: var(--primary-color);
+  color: var(--white);
+}
+
+.bg-secondary-custom {
+  background-color: var(--secondary-color);
+  color: var(--white);
+}
+
+.bg-light-custom {
+  background-color: var(--light);
+}
+
+/* Sombras */
+.shadow-sm-custom {
+  box-shadow: var(--shadow-sm);
+}
+
+.shadow-md-custom {
+  box-shadow: var(--shadow-md);
+}
+
+.shadow-lg-custom {
+  box-shadow: var(--shadow-lg);
+}
+
+/* Bordes redondeados */
+.rounded-custom {
+  border-radius: var(--border-radius);
+}
+
+.rounded-lg-custom {
+  border-radius: var(--border-radius-lg);
+}
+
+/* Accesibilidad */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.focus-visible:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Responsive helpers */
+.desktop-only {
+  display: block;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none;
+  }
+  
+  .mobile-only {
+    display: block;
+  }
+}
+
+/* Dividers */
+.divider {
+  height: 1px;
+  background: var(--gray-light);
+  margin: var(--spacing-md) 0;
+}
+
+.divider-thick {
+  height: 2px;
+  background: var(--primary-light);
+  margin: var(--spacing-lg) 0;
+}
+
+/* Badges personalizados */
+.badge-custom {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+/* Tooltips simples */
+.tooltip-custom {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-custom::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--dark);
+  color: var(--white);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  margin-bottom: 5px;
+}
+
+.tooltip-custom:hover::after {
+  opacity: 1;
+}
+
+/* Flex helpers */
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.gap-sm {
+  gap: var(--spacing-sm);
+}
+
+.gap-md {
+  gap: var(--spacing-md);
+}
+
+.gap-lg {
+  gap: var(--spacing-lg);
+}

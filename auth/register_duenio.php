@@ -25,31 +25,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Registro de Dueño</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<title>Registro de Dueño - Ofertópolis</title>
+<link rel="stylesheet" href="../css/estilos.css">
+<link rel="stylesheet" href="../css/forms.css">
+<link rel="stylesheet" href="../css/utilities.css">
 </head>
-<body class="bg-light">
-<div class="container mt-5 col-md-6">
-  <h3 class="mb-3 text-center">Registro de Dueño de Local</h3>
-  <?php if(isset($mensajeOK)): ?><div class="alert alert-success"><?= $mensajeOK ?></div><?php endif; ?>
-  <?php if(isset($error)): ?><div class="alert alert-danger"><?= $error ?></div><?php endif; ?>
+<body>
+<div class="form-container">
+  <div class="form-card">
+    <div class="form-header">
+      <h1 class="form-title">Registro de Dueño</h1>
+      <p class="form-subtitle">Registrá tu local y publicá tus promociones</p>
+    </div>
 
-  <form method="POST">
-    <div class="mb-3">
-      <label>Nombre completo</label>
-      <input type="text" name="nombre" class="form-control" required>
+    <?php if(isset($mensajeOK)): ?>
+      <div class="form-alert form-alert-success"><?= $mensajeOK ?></div>
+    <?php endif; ?>
+    
+    <?php if(isset($error)): ?>
+      <div class="form-alert form-alert-error"><?= $error ?></div>
+    <?php endif; ?>
+
+    <form method="POST">
+      <div class="form-group">
+        <label class="form-label-custom">Nombre completo</label>
+        <input type="text" name="nombre" class="form-control-custom" placeholder="Ingresá tu nombre completo" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label-custom">Email</label>
+        <input type="email" name="email" class="form-control-custom" placeholder="tu@email.com" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label-custom">Contraseña</label>
+        <input type="password" name="password" class="form-control-custom" placeholder="Mínimo 6 caracteres" required>
+      </div>
+      
+      <div class="form-alert form-alert-warning" style="margin-bottom: var(--spacing-md);">
+        Tu cuenta deberá ser aprobada por un administrador antes de poder acceder.
+      </div>
+      
+      <div class="form-button-group">
+        <button type="submit" class="btn-primary-custom" style="width: 100%;">Registrarme</button>
+        <a href="../index.php" class="btn-outline-custom" style="width: 100%; text-align: center; text-decoration: none; display: inline-block;">← Volver al Inicio</a>
+      </div>
+    </form>
+
+    <div class="form-footer">
+      <p class="form-footer-text">¿Ya tenés una cuenta? <a href="login.php" class="form-footer-link">Iniciá sesión</a></p>
     </div>
-    <div class="mb-3">
-      <label>Email</label>
-      <input type="email" name="email" class="form-control" required>
-    </div>
-    <div class="mb-3">
-      <label>Contraseña</label>
-      <input type="password" name="password" class="form-control" required>
-    </div>
-    <button type="submit" class="btn btn-primary w-100">Registrarme</button>
-  </form>
-  <p class="mt-3 text-center"><a href="login.php">Ya tengo una cuenta</a></p>
+  </div>
 </div>
 </body>
 </html>

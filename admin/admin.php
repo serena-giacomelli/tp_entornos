@@ -20,14 +20,22 @@ $res_duenios = $conn->query($sql_duenios);
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Panel del Administrador - Ofertópolis</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel del Administrador - OFERTÓPOLIS</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="../css/estilos.css" rel="stylesheet">
+<link href="../css/header.css" rel="stylesheet">
+<link href="../css/footer.css" rel="stylesheet">
+<link href="../css/panels.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body>
 
-<div class="container mt-4">
+<?php include("../includes/header.php"); ?>
+
+<main id="main-content" class="main-content">
+<div class="container mt-4 mb-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Panel del Administrador</h2>
+    <h2 style="color: var(--primary-color); font-weight: 700;">Panel del Administrador</h2>
     <a href="../auth/logout.php" class="btn btn-danger">Cerrar sesión</a>
   </div>
 
@@ -40,63 +48,95 @@ $res_duenios = $conn->query($sql_duenios);
   <!-- Tarjetas de navegación -->
   <div class="row text-center mb-4">
     <div class="col-md-3 mb-3">
-      <a href="locales.php" class="btn btn-outline-primary w-100 py-3">
-        🏪 Gestionar Locales
+      <a href="locales.php" class="text-decoration-none">
+        <div class="card shadow-sm h-100 hover-card">
+          <div class="card-body py-4">
+            <h4 style="color: var(--primary-color);">Gestionar Locales</h4>
+          </div>
+        </div>
       </a>
     </div>
     <div class="col-md-3 mb-3">
-      <a href="novedades.php" class="btn btn-outline-success w-100 py-3">
-        📰 Novedades
+      <a href="novedades.php" class="text-decoration-none">
+        <div class="card shadow-sm h-100 hover-card">
+          <div class="card-body py-4">
+            <h4 style="color: var(--primary-color);">Novedades</h4>
+          </div>
+        </div>
       </a>
     </div>
     <div class="col-md-3 mb-3">
-      <a href="promociones.php" class="btn btn-outline-warning w-100 py-3">
-        🎟️ Promociones
+      <a href="promociones.php" class="text-decoration-none">
+        <div class="card shadow-sm h-100 hover-card">
+          <div class="card-body py-4">
+            <h4 style="color: var(--primary-color);">Promociones</h4>
+          </div>
+        </div>
       </a>
     </div>
     <div class="col-md-3 mb-3">
-      <a href="reportes.php" class="btn btn-outline-dark w-100 py-3">
-        📊 Reportes
+      <a href="reportes.php" class="text-decoration-none">
+        <div class="card shadow-sm h-100 hover-card">
+          <div class="card-body py-4">
+            <h4 style="color: var(--primary-color);">Reportes</h4>
+          </div>
+        </div>
       </a>
     </div>
   </div>
 
   <!-- Dueños pendientes -->
-  <div class="card">
-    <div class="card-header bg-secondary text-white">
-      Dueños de Local Pendientes de Aprobación
+  <div class="card shadow-sm">
+    <div class="card-header text-white" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));">
+      <h5 class="mb-0">Dueños de Local Pendientes de Aprobación</h5>
     </div>
     <div class="card-body">
       <?php if($res_duenios->num_rows > 0): ?>
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Email</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php while($d = $res_duenios->fetch_assoc()): ?>
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead style="background-color: var(--light);">
               <tr>
-                <td><?= $d['id'] ?></td>
-                <td><?= htmlspecialchars($d['nombre']) ?></td>
-                <td><?= htmlspecialchars($d['email']) ?></td>
-                <td>
-                  <a href="../auth/validar.php?id=<?= $d['id'] ?>" class="btn btn-success btn-sm">Aprobar</a>
-                </td>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Acción</th>
               </tr>
-            <?php endwhile; ?>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <?php while($d = $res_duenios->fetch_assoc()): ?>
+                <tr>
+                  <td><strong>#<?= $d['id'] ?></strong></td>
+                  <td><?= htmlspecialchars($d['nombre']) ?></td>
+                  <td><?= htmlspecialchars($d['email']) ?></td>
+                  <td>
+                    <a href="../auth/validar.php?id=<?= $d['id'] ?>" class="btn btn-success btn-sm">Aprobar</a>
+                  </td>
+                </tr>
+              <?php endwhile; ?>
+            </tbody>
+          </table>
+        </div>
       <?php else: ?>
-        <p class="text-muted">No hay dueños pendientes por aprobar.</p>
+        <p class="text-muted text-center mb-0">No hay dueños pendientes por aprobar.</p>
       <?php endif; ?>
     </div>
   </div>
 
 </div>
+</main>
 
+<style>
+.hover-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.hover-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(113, 0, 20, 0.2) !important;
+}
+</style>
+
+<?php include("../includes/footer.php"); ?>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -62,15 +62,27 @@ if (isset($_POST['guardar'])) {
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Panel del Cliente</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel del Cliente - OFERTÓPOLIS</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="../css/estilos.css" rel="stylesheet">
+<link href="../css/header.css" rel="stylesheet">
+<link href="../css/footer.css" rel="stylesheet">
+<link href="../css/panels.css" rel="stylesheet">
 </head>
-<body class="bg-light">
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>👤 Panel del Cliente</h3>
+<body>
+
+<?php include("../includes/header.php"); ?>
+
+<main id="main-content" class="main-content">
+<div class="container mt-4 mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>Panel del Cliente</h3>
     <div>
-      <a href="promociones.php" class="btn btn-primary me-2">🎁 Ver Promociones</a>
+      <button type="button" class="btn btn-secondary me-2" data-bs-toggle="modal" data-bs-target="#editarPerfilModal">
+        Editar Perfil
+      </button>
+      <a href="../promociones.php" class="btn btn-primary me-2">Ver Promociones</a>
       <a href="../auth/logout.php" class="btn btn-danger">Cerrar sesión</a>
     </div>
   </div>
@@ -81,7 +93,7 @@ if (isset($_POST['guardar'])) {
   <!-- INFORMACIÓN DEL CLIENTE -->
   <div class="card mb-4">
     <div class="card-header bg-info text-white">
-      <h5 class="mb-0">👤 Información de Usuario</h5>
+      <h5 class="mb-0">Información de Usuario</h5>
     </div>
     <div class="card-body">
       <div class="row">
@@ -98,14 +110,9 @@ if (isset($_POST['guardar'])) {
                 'medium' => 'bg-info',
                 default => 'bg-secondary'
             };
-            $emoji = match($categoria_actual) {
-                'premium' => '👑',
-                'medium' => '⭐',
-                default => '🎫'
-            };
             ?>
             <span class="badge <?= $badge_color ?>">
-              <?= $emoji ?> <?= strtoupper($categoria_actual) ?>
+              <?= strtoupper($categoria_actual) ?>
             </span>
           </p>
           <p><strong>Promociones solicitadas:</strong> <?= $count_promos['total'] ?></p>
@@ -177,7 +184,7 @@ if (isset($_POST['guardar'])) {
         <!-- Tabla de Niveles -->
         <div class="mt-3">
           <small class="text-muted">
-            <strong>📊 Niveles de categoría:</strong>
+            <strong>Niveles de categoría:</strong>
           </small>
           <table class="table table-sm table-bordered mt-2">
             <thead class="table-light">
@@ -189,37 +196,37 @@ if (isset($_POST['guardar'])) {
             </thead>
             <tbody>
               <tr class="<?= $categoria_actual == 'inicial' ? 'table-secondary' : '' ?>">
-                <td>🎫 Inicial</td>
+                <td>Inicial</td>
                 <td>0 usos</td>
                 <td>
                   <?php if ($categoria_actual == 'inicial'): ?>
                     <span class="badge bg-secondary">Actual</span>
                   <?php else: ?>
-                    <span class="badge bg-success">✓ Completado</span>
+                    <span class="badge bg-success">Completado</span>
                   <?php endif; ?>
                 </td>
               </tr>
               <tr class="<?= $categoria_actual == 'medium' ? 'table-info' : '' ?>">
-                <td>⭐ Medium</td>
+                <td>Medium</td>
                 <td>5 usos</td>
                 <td>
                   <?php if ($categoria_actual == 'medium'): ?>
                     <span class="badge bg-info">Actual</span>
                   <?php elseif ($usos_aceptados >= 5): ?>
-                    <span class="badge bg-success">✓ Completado</span>
+                    <span class="badge bg-success">Completado</span>
                   <?php else: ?>
                     <span class="badge bg-warning text-dark">Bloqueado</span>
                   <?php endif; ?>
                 </td>
               </tr>
               <tr class="<?= $categoria_actual == 'premium' ? 'table-warning' : '' ?>">
-                <td>👑 Premium</td>
+                <td>Premium</td>
                 <td>10 usos</td>
                 <td>
                   <?php if ($categoria_actual == 'premium'): ?>
                     <span class="badge bg-warning text-dark">Actual</span>
                   <?php elseif ($usos_aceptados >= 10): ?>
-                    <span class="badge bg-success">✓ Completado</span>
+                    <span class="badge bg-success">Completado</span>
                   <?php else: ?>
                     <span class="badge bg-secondary">Bloqueado</span>
                   <?php endif; ?>
@@ -232,102 +239,51 @@ if (isset($_POST['guardar'])) {
     </div>
   </div>
 
-  <!-- PERFIL -->
-  <div class="card">
-    <div class="card-header bg-dark text-white">Mi Perfil</div>
-    <div class="card-body">
+</div>
+</main>
+
+<!-- Modal para Editar Perfil -->
+<div class="modal fade" id="editarPerfilModal" tabindex="-1" aria-labelledby="editarPerfilModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title" id="editarPerfilModalLabel">Editar Mi Perfil</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
       <form method="POST">
-        <div class="mb-3">
-          <label>Nombre:</label>
-          <input type="text" name="nombre" value="<?= htmlspecialchars($cliente['nombre']) ?>" class="form-control" required>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Nombre:</label>
+            <input type="text" name="nombre" value="<?= htmlspecialchars($cliente['nombre']) ?>" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email:</label>
+            <input type="email" name="email" value="<?= htmlspecialchars($cliente['email']) ?>" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Contraseña:</label>
+            <input type="password" name="password" class="form-control" placeholder="Dejar en blanco si no desea cambiarla">
+            <small class="text-muted">Solo completar si desea cambiar la contraseña actual</small>
+          </div>
         </div>
-        <div class="mb-3">
-          <label>Email:</label>
-          <input type="email" name="email" value="<?= htmlspecialchars($cliente['email']) ?>" class="form-control" required>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" name="guardar" class="btn btn-primary">Guardar cambios</button>
         </div>
-        <div class="mb-3">
-          <label>Contraseña (dejar en blanco si no desea cambiarla):</label>
-          <input type="password" name="password" class="form-control">
-        </div>
-        <button type="submit" name="guardar" class="btn btn-primary">Guardar cambios</button>
       </form>
     </div>
   </div>
-
-<!-- PROMOCIONES -->
-<div class="card mt-4">
-  <div class="card-header bg-secondary text-white">🎁 Promociones Disponibles</div>
-  <div class="card-body">
-    <?php
-    include("../includes/db.php");
-    $categoria = $_SESSION['usuario_categoria'];
-    $idCliente = $_SESSION['usuario_id'];
-
-    if (isset($_POST['solicitar'])) {
-        $id_promo = intval($_POST['id_promo']);
-        $check = $conn->query("SELECT * FROM uso_promociones WHERE id_cliente=$idCliente AND id_promo=$id_promo");
-        if ($check->num_rows == 0) {
-            $conn->query("INSERT INTO uso_promociones (id_cliente, id_promo) VALUES ($idCliente, $id_promo)");
-            echo "<div class='alert alert-success'>Solicitud enviada al local.</div>";
-        } else {
-            echo "<div class='alert alert-warning'>Ya solicitaste esta promoción.</div>";
-        }
-    }
-
-    $sql = "SELECT p.id AS id_promo, p.titulo, p.descripcion, l.nombre 
-            FROM promociones p 
-            JOIN locales l ON p.id_local = l.id
-            WHERE p.estado='aprobada'
-              AND (
-                p.categoria_minima = 'inicial'
-                OR ('$categoria'='medium' AND p.categoria_minima IN ('inicial','medium'))
-                OR ('$categoria'='premium' AND p.categoria_minima IN ('inicial','medium','premium'))
-              )";
-
-    $res = $conn->query($sql);
-    if ($res->num_rows > 0) {
-        while ($promo = $res->fetch_assoc()) {
-            echo "
-            <form method='POST' class='border rounded p-3 mb-3 bg-white'>
-              <h5>{$promo['titulo']}</h5>
-              <p>{$promo['descripcion']}</p>
-              <p><strong>Local:</strong> {$promo['nombre']}</p>
-              <button type='submit' name='solicitar' value='1' class='btn btn-primary btn-sm'>Solicitar Promoción</button>
-              <input type='hidden' name='id_promo' value='{$promo['id_promo']}'>
-            </form>";
-        }
-    } else {
-        echo "<p>No hay promociones disponibles por el momento.</p>";
-    }
-    ?>
-  </div>
 </div>
 
-  <!-- NOVEDADES -->
-  <div class="card mt-4 mb-4">
-    <div class="card-header bg-info text-white">📰 Novedades Recientes</div>
-    <div class="card-body">
-      <?php
-      $novedades = $conn->query("SELECT titulo, contenido, fecha_publicacion FROM novedades ORDER BY fecha_publicacion DESC LIMIT 5");
-      if ($novedades && $novedades->num_rows > 0) {
-          while ($n = $novedades->fetch_assoc()) {
-              echo "
-                <div class='mb-3'>
-                  <h6 class='text-dark fw-bold'>{$n['titulo']}</h6>
-                  <small class='text-muted'>".date('d/m/Y', strtotime($n['fecha_publicacion']))."</small>
-                  <p>{$n['contenido']}</p>
-                  <hr>
-                </div>
-              ";
-          }
-      } else {
-          echo "<p>No hay novedades disponibles.</p>";
-      }
-      ?>
-    </div>
-  </div>
+<?php include("../includes/footer.php"); ?>
 
-</div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Mostrar modal automáticamente si hay un mensaje (después de guardar cambios)
+<?php if(isset($mensaje) || isset($error)): ?>
+  var editarPerfilModal = new bootstrap.Modal(document.getElementById('editarPerfilModal'));
+  editarPerfilModal.show();
+<?php endif; ?>
+</script>
 </body>
 </html>

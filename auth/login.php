@@ -31,33 +31,51 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Login - Ofertópolis</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Iniciar Sesión - Ofertópolis</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="../css/forms.css">
+  <link rel="stylesheet" href="../css/utilities.css">
 </head>
-<body class="bg-light">
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-5">
-      <div class="card">
-        <div class="card-header bg-dark text-white">Iniciar Sesión</div>
-        <div class="card-body">
-          <?php if(isset($error)): ?><div class="alert alert-danger"><?= $error ?></div><?php endif; ?>
-          <form method="POST">
-            <div class="mb-3">
-              <label>Email:</label>
-              <input type="email" name="email" class="form-control" required>
-            </div>
-            <div class="mb-3">
-              <label>Contraseña:</label>
-              <input type="password" name="password" class="form-control" required>
-            </div>
-            <button class="btn btn-primary w-100">Entrar</button>
-          </form>
-          <hr>
-          <p class="text-center mb-1"><a href="register_cliente.php">Registrarse como Cliente</a></p>
-          <p class="text-center"><a href="register_duenio.php">Registrarse como Dueño</a></p>
-        </div>
+<body>
+<div class="form-container">
+  <div class="form-card">
+    <div class="form-header">
+      <h1 class="form-title">Iniciar Sesión</h1>
+      <p class="form-subtitle">Bienvenido a Ofertópolis</p>
+    </div>
+
+    <?php if(isset($error)): ?>
+      <div class="form-alert form-alert-error"><?= $error ?></div>
+    <?php endif; ?>
+
+    <form method="POST">
+      <div class="form-group">
+        <label class="form-label-custom">Email</label>
+        <input type="email" name="email" class="form-control-custom" placeholder="tu@email.com" required>
       </div>
+      
+      <div class="form-group">
+        <label class="form-label-custom">Contraseña</label>
+        <input type="password" name="password" class="form-control-custom" placeholder="Tu contraseña" required>
+      </div>
+      
+      <div class="form-button-group">
+        <button type="submit" class="btn-primary-custom" style="width: 100%;">Entrar</button>
+        <a href="../index.php" class="btn-outline-custom" style="width: 100%; text-align: center; text-decoration: none; display: inline-block;">← Volver al Inicio</a>
+      </div>
+    </form>
+
+    <div class="form-divider">
+      <span>¿No tenés cuenta?</span>
+    </div>
+
+    <div class="form-footer">
+      <p class="form-footer-text">
+        <a href="register_cliente.php" class="form-footer-link">Registrate como Cliente</a>
+      </p>
+      <p class="form-footer-text">
+        <a href="register_duenio.php" class="form-footer-link">Registrate como Dueño de Local</a>
+      </p>
     </div>
   </div>
 </div>

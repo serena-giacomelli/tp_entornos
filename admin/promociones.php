@@ -69,12 +69,12 @@ if (isset($_GET['accion']) && $_GET['accion'] == 'aprobar' && isset($_GET['id'])
             }
 
             $mail->addAddress($duenio['email'], $duenio['nombre']);
-            $mail->Subject = '✅ Promoción aprobada';
+            $mail->Subject = 'Promoción aprobada';
             $mail->Body = "Hola {$duenio['nombre']},\n\n" .
                           "¡Buenas noticias! Tu promoción ha sido aprobada por el administrador.\n\n" .
-                          "📌 Título: {$duenio['titulo']}\n" .
-                          "📝 Descripción: {$duenio['descripcion']}\n" .
-                          "📅 Vigencia: del {$duenio['fecha_inicio']} al {$duenio['fecha_fin']}\n\n" .
+                          "Título: {$duenio['titulo']}\n" .
+                          "Descripción: {$duenio['descripcion']}\n" .
+                          "Vigencia: del {$duenio['fecha_inicio']} al {$duenio['fecha_fin']}\n\n" .
                           "Tu promoción ya está visible para los clientes del shopping.\n\n" .
                           "Atentamente,\n" .
                           "Equipo Ofertópolis";
@@ -124,11 +124,11 @@ if (isset($_GET['accion']) && $_GET['accion'] == 'rechazar' && isset($_GET['id']
             }
 
             $mail->addAddress($duenio['email'], $duenio['nombre']);
-            $mail->Subject = '❌ Promoción rechazada';
+            $mail->Subject = 'Promoción rechazada';
             $mail->Body = "Hola {$duenio['nombre']},\n\n" .
                           "Lamentamos informarte que tu promoción ha sido rechazada.\n\n" .
-                          "📌 Título: {$duenio['titulo']}\n" .
-                          "📝 Descripción: {$duenio['descripcion']}\n\n" .
+                          "Título: {$duenio['titulo']}\n" .
+                          "Descripción: {$duenio['descripcion']}\n\n" .
                           "Por favor, revisa los términos y condiciones para crear promociones y " .
                           "vuelve a intentarlo con una promoción que cumpla con nuestras políticas.\n\n" .
                           "Atentamente,\n" .
@@ -162,15 +162,26 @@ $locales = $conn->query("SELECT id, nombre FROM locales");
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Promociones - Panel Admin</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="../css/estilos.css" rel="stylesheet">
+<link href="../css/header.css" rel="stylesheet">
+<link href="../css/footer.css" rel="stylesheet">
+<link href="../css/panels.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body>
 
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>🎟️ Gestión de Promociones</h3>
-    <a href="admin.php" class="btn btn-secondary">← Volver al panel</a>
+<?php include("../includes/header.php"); ?>
+
+<main id="main-content" class="main-content">
+<div class="container mt-4 mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 style="color: var(--primary-color); font-weight: 700;">Gestión de Promociones</h3>
+    <div>
+      <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#modalAgregar">Nueva Promoción</button>
+      <a href="admin.php" class="btn btn-secondary">Volver al Panel</a>
+    </div>
   </div>
 
   <?php if(isset($notification)): ?>
@@ -180,35 +191,40 @@ $locales = $conn->query("SELECT id, nombre FROM locales");
     </div>
   <?php endif; ?>
 
-  <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalAgregar">➕ Nueva Promoción</button>
-
-  <table class="table table-bordered">
-    <thead class="table-dark">
-      <tr>
-        <th>ID</th>
-        <th>Título</th>
-        <th>Descripción</th>
-        <th>Local</th>
-        <th>Categoría Mínima</th>
-        <th>Estado</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
+  <!-- Tabla -->
+  <div class="card shadow-sm">
+    <div class="card-header text-white" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));">
+      <h5 class="mb-0">Lista de Promociones</h5>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead style="background-color: var(--light);">
+            <tr>
+              <th>ID</th>
+              <th>Título</th>
+              <th>Descripción</th>
+              <th>Local</th>
+              <th>Categoría Mínima</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
       <?php while($p = $promos->fetch_assoc()): ?>
         <tr>
-          <td><?= $p['id'] ?></td>
+          <td><strong>#<?= $p['id'] ?></strong></td>
           <td><?= htmlspecialchars($p['titulo']) ?></td>
           <td><?= htmlspecialchars($p['descripcion']) ?></td>
           <td><?= htmlspecialchars($p['local']) ?></td>
-          <td><?= htmlspecialchars($p['categoria_minima']) ?></td>
+          <td><span class="badge bg-info"><?= htmlspecialchars($p['categoria_minima']) ?></span></td>
           <td>
             <?php if($p['estado'] == 'pendiente'): ?>
-              <span class="badge bg-warning">⏳ Pendiente</span>
+              <span class="badge bg-warning">Pendiente</span>
             <?php elseif($p['estado'] == 'aprobada'): ?>
-              <span class="badge bg-success">✅ Aprobada</span>
+              <span class="badge bg-success">Aprobada</span>
             <?php elseif($p['estado'] == 'rechazada'): ?>
-              <span class="badge bg-danger">❌ Rechazada</span>
+              <span class="badge bg-danger">Rechazada</span>
             <?php endif; ?>
           </td>
           <td>
@@ -216,27 +232,30 @@ $locales = $conn->query("SELECT id, nombre FROM locales");
               <a href="?accion=aprobar&id=<?= $p['id'] ?>&pagina=<?= $pagina ?>" 
                  class="btn btn-success btn-sm" 
                  onclick="return confirm('¿Aprobar esta promoción?')">
-                ✅ Aprobar
+                Aprobar
               </a>
               <a href="?accion=rechazar&id=<?= $p['id'] ?>&pagina=<?= $pagina ?>" 
                  class="btn btn-warning btn-sm" 
                  onclick="return confirm('¿Rechazar esta promoción?')">
-                ❌ Rechazar
+                Rechazar
               </a>
             <?php endif; ?>
             <a href="?eliminar=<?= $p['id'] ?>&pagina=<?= $pagina ?>" 
                class="btn btn-danger btn-sm" 
                onclick="return confirm('¿Eliminar promoción?')">
-              🗑️
+              Eliminar
             </a>
           </td>
         </tr>
       <?php endwhile; ?>
-    </tbody>
-  </table>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
   <!-- Paginación -->
-  <nav aria-label="Paginación de promociones">
+  <nav aria-label="Paginación de promociones" class="mt-4">
     <ul class="pagination justify-content-center">
       <!-- Botón Anterior -->
       <?php if ($pagina > 1): ?>
@@ -274,27 +293,28 @@ $locales = $conn->query("SELECT id, nombre FROM locales");
     Página <?= $pagina ?> de <?= $total_paginas ?> | Total: <?= $total_promociones ?> promociones
   </p>
 </div>
+</main>
 
 <!-- Modal agregar -->
 <div class="modal fade" id="modalAgregar" tabindex="-1">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
+      <div class="modal-header text-white" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));">
+        <h5 class="modal-title">Nueva Promoción</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
       <form method="POST">
-        <div class="modal-header">
-          <h5 class="modal-title">Nueva Promoción</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
         <div class="modal-body">
           <div class="mb-3">
-            <label>Título:</label>
+            <label class="form-label fw-bold">Título:</label>
             <input type="text" name="titulo" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label>Descripción:</label>
-            <textarea name="descripcion" class="form-control" required></textarea>
+            <label class="form-label fw-bold">Descripción:</label>
+            <textarea name="descripcion" class="form-control" rows="3" required></textarea>
           </div>
           <div class="mb-3">
-            <label>Local:</label>
+            <label class="form-label fw-bold">Local:</label>
             <select name="id_local" class="form-select" required>
               <option value="">Seleccionar...</option>
               <?php
@@ -306,15 +326,15 @@ $locales = $conn->query("SELECT id, nombre FROM locales");
             </select>
           </div>
           <div class="mb-3">
-            <label>Fecha inicio:</label>
+            <label class="form-label fw-bold">Fecha inicio:</label>
             <input type="date" name="fecha_inicio" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label>Fecha fin:</label>
+            <label class="form-label fw-bold">Fecha fin:</label>
             <input type="date" name="fecha_fin" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label>Categoría mínima:</label>
+            <label class="form-label fw-bold">Categoría mínima:</label>
             <select name="categoria_minima" class="form-select" required>
               <option value="inicial">Inicial</option>
               <option value="medium">Medium</option>
@@ -323,12 +343,15 @@ $locales = $conn->query("SELECT id, nombre FROM locales");
           </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" name="agregar" class="btn btn-primary">Agregar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" name="agregar" class="btn btn-primary">Agregar Promoción</button>
         </div>
       </form>
     </div>
   </div>
 </div>
+
+<?php include("../includes/footer.php"); ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

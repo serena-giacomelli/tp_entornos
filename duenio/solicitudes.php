@@ -31,11 +31,14 @@ if (isset($_GET['accion']) && isset($_GET['id'])) {
             $cliente_info = $conn->query("SELECT nombre, email, categoria FROM usuarios WHERE id=$id_cliente")->fetch_assoc();
             $categoria_anterior = $cliente_info['categoria'];
 
-            // Contar promociones aceptadas
-            $count = $conn->query("SELECT COUNT(*) AS total FROM uso_promociones WHERE id_cliente=$id_cliente AND estado='aceptada'")
+            // Contar promociones aceptadas en los últimos 6 meses (según regla de negocio)
+            $count = $conn->query("SELECT COUNT(*) AS total FROM uso_promociones 
+                                   WHERE id_cliente=$id_cliente 
+                                   AND estado='aceptada'
+                                   AND fecha_uso >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)")
                         ->fetch_assoc()['total'];
 
-            // Determinar nueva categoría según cantidad
+            // Determinar nueva categoría según cantidad (último semestre)
             $nueva_categoria = 'inicial';
             if ($count >= 10) {
                 $nueva_categoria = 'premium';
@@ -116,7 +119,7 @@ $res = $conn->query($sql);
 </head>
 <body class="bg-light">
 <div class="container mt-4">
-  <h3 class="mb-3">📩 Solicitudes Recibidas</h3>
+  <h3 class="mb-3">Solicitudes Recibidas</h3>
   <a href="duenio.php" class="btn btn-secondary mb-3">Volver al panel</a>
 
   <?php if(isset($success_message)): ?>

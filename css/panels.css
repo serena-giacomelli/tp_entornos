@@ -1,0 +1,174 @@
+/* ============================================
+   PANELES - panels.css
+   Estilos para paneles de admin, dueño y cliente
+   ============================================ */
+
+.panel-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: var(--white);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  margin-bottom: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.panel-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.panel-subtitle {
+  font-size: var(--font-size-base);
+  opacity: 0.9;
+  margin-top: var(--spacing-xs);
+}
+
+.panel-welcome {
+  background: var(--white);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.panel-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.stat-card {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--primary-color);
+}
+
+.stat-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.stat-icon {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-xs);
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: var(--spacing-xs) 0;
+}
+
+.stat-label {
+  font-size: var(--font-size-sm);
+  color: var(--gray);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.panel-section {
+  background: var(--white);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.panel-section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: var(--spacing-md);
+  border-bottom: 2px solid var(--primary-light);
+  padding-bottom: var(--spacing-xs);
+}
+
+.action-buttons {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--spacing-md);
+}
+
+/* Tablas en paneles */
+.panel-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--spacing-md);
+}
+
+.panel-table thead {
+  background: var(--primary-light);
+}
+
+.panel-table th {
+  padding: var(--spacing-sm);
+  text-align: left;
+  font-weight: 600;
+  color: var(--dark);
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.panel-table td {
+  padding: var(--spacing-sm);
+  border-bottom: 1px solid var(--light);
+}
+
+.panel-table tr:hover {
+  background-color: var(--light);
+}
+
+/* Alertas en paneles */
+.panel-alert {
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  margin-bottom: var(--spacing-md);
+  border-left: 4px solid;
+}
+
+.panel-alert-success {
+  background-color: #E8F5E9;
+  border-left-color: var(--success-color);
+  color: #2E7D32;
+}
+
+.panel-alert-warning {
+  background-color: #FFF3E0;
+  border-left-color: var(--warning-color);
+  color: #E65100;
+}
+
+.panel-alert-info {
+  background-color: #E3F2FD;
+  border-left-color: var(--info-color);
+  color: #1565C0;
+}
+
+.panel-alert-danger {
+  background-color: #FFEBEE;
+  border-left-color: var(--danger-color);
+  color: #C62828;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .panel-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .panel-title {
+    font-size: 1.5rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .action-buttons .btn {
+    width: 100%;
+  }
+}

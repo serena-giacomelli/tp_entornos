@@ -1,4 +1,8 @@
-<h3 class="text-primary mb-3">🎁 Promociones destacadas</h3>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h3 class="section-title">
+    Promociones Destacadas
+  </h3>
+</div>
 
 <!-- Formulario de Filtros -->
 <form method="GET" class="mb-4">
@@ -7,7 +11,7 @@
       <input type="text" 
              name="buscar" 
              class="form-control" 
-             placeholder="🔍 Buscar promoción..." 
+             placeholder="Buscar promoción..." 
              value="<?= htmlspecialchars($_GET['buscar'] ?? '') ?>">
     </div>
     <div class="col-md-4">
@@ -69,7 +73,7 @@ if (!empty($params_filtro)): ?>
 
 <?php
 // Consulta con filtros
-$sql = "SELECT p.titulo, p.descripcion, l.nombre AS local, l.rubro
+$sql = "SELECT p.titulo, p.descripcion, l.nombre AS local, l.ubicacion, l.rubro
         FROM promociones p 
         JOIN locales l ON p.id_local = l.id
         WHERE p.estado='aprobada' $filtro
@@ -81,16 +85,25 @@ $promos = $conn->query($sql);
 if ($promos && $promos->num_rows > 0):
   while($p = $promos->fetch_assoc()):
 ?>
-  <div class="card mb-3 shadow-sm">
+  <div class="card card-custom mb-3">
     <div class="card-body">
-      <h5 class="fw-bold text-dark"><?= htmlspecialchars($p['titulo']) ?></h5>
-      <p class="text-muted mb-1">
-        <strong>🏪 Local:</strong> <?= htmlspecialchars($p['local']) ?>
+      <h5 class="card-title-promo">
+        <?= htmlspecialchars($p['titulo']) ?>
+      </h5>
+      <div class="mb-2">
+        <strong class="card-info-label">Local:</strong> 
+        <span class="card-info-value"><?= htmlspecialchars($p['local']) ?></span>
         <?php if (!empty($p['rubro'])): ?>
           <span class="badge bg-info ms-2"><?= htmlspecialchars($p['rubro']) ?></span>
         <?php endif; ?>
-      </p>
-      <p><?= htmlspecialchars($p['descripcion']) ?></p>
+      </div>
+      <?php if (!empty($p['ubicacion'])): ?>
+        <div class="mb-2">
+          <strong class="card-info-label">Ubicación:</strong> 
+          <small class="text-muted"><?= htmlspecialchars($p['ubicacion']) ?></small>
+        </div>
+      <?php endif; ?>
+      <p class="mb-0 mt-3"><?= htmlspecialchars($p['descripcion']) ?></p>
     </div>
   </div>
 <?php endwhile; else: ?>

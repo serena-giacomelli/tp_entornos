@@ -23,31 +23,186 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Contacto - Shopping Promociones</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contacto - Ofertópolis</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/estilos.css" rel="stylesheet">
+  <link href="css/header.css" rel="stylesheet">
+  <link href="css/footer.css" rel="stylesheet">
+  <link href="css/forms.css" rel="stylesheet">
+  <style>
+    .contact-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+    
+    .contact-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .contact-header {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      padding: 2rem;
+      text-align: center;
+    }
+    
+    .contact-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 0.5rem 0;
+    }
+    
+    .contact-header p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 0.95rem;
+    }
+    
+    .contact-body {
+      padding: 2rem;
+    }
+    
+    .form-label {
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+    }
+    
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.25rem rgba(113, 0, 20, 0.15);
+    }
+    
+    .contact-info {
+      background: var(--light);
+      border-left: 4px solid var(--primary-color);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1.5rem;
+    }
+    
+    .contact-info-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    
+    .contact-info-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .contact-info-icon {
+      width: 24px;
+      margin-right: 0.75rem;
+      font-size: 1.2rem;
+    }
+  </style>
 </head>
-<body class="bg-light">
-<div class="container mt-5 col-md-6">
-  <h3 class="text-center mb-3">Formulario de Contacto</h3>
+<body>
 
-  <?php if(isset($ok)): ?><div class="alert alert-success"><?= $ok ?></div><?php endif; ?>
-  <?php if(isset($error)): ?><div class="alert alert-danger"><?= $error ?></div><?php endif; ?>
+<?php include("includes/header.php"); ?>
 
-  <form method="POST">
-    <div class="mb-3">
-      <label>Nombre</label>
-      <input type="text" name="nombre" class="form-control" required>
+<main id="main-content" class="main-content">
+  <div class="contact-container">
+    <div class="contact-card">
+      <div class="contact-header">
+        <h1>Formulario de Contacto</h1>
+        <p>¿Tenés alguna consulta? Escribinos y te responderemos a la brevedad</p>
+      </div>
+
+      <div class="contact-body">
+
+      <div class="contact-body">
+        <?php if(isset($ok)): ?>
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <strong>¡Éxito!</strong> <?= $ok ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        <?php endif; ?>
+        
+        <?php if(isset($error)): ?>
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Error:</strong> <?= $error ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        <?php endif; ?>
+
+        <form method="POST">
+          <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre completo</label>
+            <input type="text" 
+                   id="nombre" 
+                   name="nombre" 
+                   class="form-control" 
+                   placeholder="Ingresa tu nombre"
+                   required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="email" class="form-label">Correo electrónico</label>
+            <input type="email" 
+                   id="email" 
+                   name="email" 
+                   class="form-control" 
+                   placeholder="tu@email.com"
+                   required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="mensaje" class="form-label">Mensaje</label>
+            <textarea id="mensaje" 
+                      name="mensaje" 
+                      class="form-control" 
+                      rows="5" 
+                      placeholder="Escribe tu consulta aquí..."
+                      required></textarea>
+          </div>
+          
+          <button type="submit" class="btn btn-primary w-100 mb-3">
+            Enviar Mensaje
+          </button>
+          
+          <a href="index.php" class="btn btn-secondary w-100">
+            Volver al Inicio
+          </a>
+        </form>
+
+        <!-- Información de contacto adicional -->
+        <div class="contact-info">
+          <h6 class="fw-bold mb-3" style="color: var(--primary-color);">También puedes contactarnos por:</h6>
+          
+          <div class="contact-info-item">
+            <span class="contact-info-icon">📧</span>
+            <span><strong>Email:</strong> info@ofertopolis.com</span>
+          </div>
+          
+          <div class="contact-info-item">
+            <span class="contact-info-icon">📱</span>
+            <span><strong>Teléfono:</strong> (011) 4567-8900</span>
+          </div>
+          
+          <div class="contact-info-item">
+            <span class="contact-info-icon">📍</span>
+            <span><strong>Dirección:</strong> Av. Principal 1234, Buenos Aires</span>
+          </div>
+          
+          <div class="contact-info-item">
+            <span class="contact-info-icon">🕒</span>
+            <span><strong>Horario:</strong> Lun a Sáb 10:00 - 22:00</span>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="mb-3">
-      <label>Email</label>
-      <input type="email" name="email" class="form-control" required>
-    </div>
-    <div class="mb-3">
-      <label>Mensaje</label>
-      <textarea name="mensaje" class="form-control" rows="5" required></textarea>
-    </div>
-    <button type="submit" class="btn btn-primary w-100">Enviar</button>
-  </form>
-</div>
+  </div>
+</main>
+
+<?php include("includes/footer.php"); ?>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
