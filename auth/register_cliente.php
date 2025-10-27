@@ -94,7 +94,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       
       <div class="form-group">
         <label class="form-label-custom">Contraseña</label>
-        <input type="password" name="password" class="form-control-custom" placeholder="Mínimo 6 caracteres" required>
+        <div class="password-wrapper">
+          <input type="password" name="password" id="register-password" class="form-control-custom" placeholder="Mínimo 6 caracteres" required>
+          <button type="button" class="password-toggle" onclick="togglePassword('register-password', this)" aria-label="Mostrar/ocultar contraseña">
+            👁️
+          </button>
+        </div>
       </div>
       
       <div class="form-button-group">
@@ -108,5 +113,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
   </div>
 </div>
+
+<script>
+function togglePassword(inputId, button) {
+  const passwordInput = document.getElementById(inputId);
+  const isPassword = passwordInput.type === 'password';
+  
+  // Cambiar tipo de input
+  passwordInput.type = isPassword ? 'text' : 'password';
+  
+  // Cambiar icono
+  button.textContent = isPassword ? '🙈' : '👁️';
+  
+  // Cambiar aria-label para accesibilidad
+  button.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
+}
+</script>
 </body>
 </html>
