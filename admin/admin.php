@@ -14,6 +14,68 @@ if (!isset($_SESSION['usuario_rol']) || $_SESSION['usuario_rol'] != 'admin') {
     exit;
 }
 
+// --- ELIMINAR USUARIO ---
+if (isset($_GET['eliminar_usuario'])) {
+    $id = intval($_GET['eliminar_usuario']);
+    
+    // No permitir eliminar al admin actual
+    if ($id == $_SESSION['usuario_id']) {
+        $error = "No puedes eliminar tu propia cuenta de administrador.";
+    } else {
+        // Si es dueño, desasignar sus locales primero
+        $conn->query("UPDATE locales SET id_duenio = NULL WHERE id_duenio = $id");
+        
+        // Eliminar el usuario
+        if ($conn->query("DELETE FROM usuarios WHERE id = $id")) {
+            $success = "Usuario eliminado exitosamente.";
+        } else {
+            $error = "Error al eliminar usuario: " . $conn->error;
+        }
+    }
+}
+
+// --- EDITAR USUARIO ---
+if (isset($_POST['editar_usuario'])) {
+    $id = intval($_POST['id']);
+    $nombre = trim($_POST['nombre']);
+    $email = trim($_POST['email']);
+    $rol = $_POST['rol'];
+    $estado_cuenta = $_POST['estado_cuenta'];
+    $categoria = $_POST['categoria'] ?? 'inicial';
+    
+    // Validar que el email no esté usado por otro usuario
+    $check = $conn->query("SELECT id FROM usuarios WHERE email='$email' AND id != $id");
+    if ($check->num_rows > 0) {
+        $error = "Ya existe otro usuario con ese email.";
+    } else {
+        $sql = "UPDATE usuarios SET 
+                nombre = '$nombre',
+                email = '$email',
+                rol = '$rol',
+                estado_cuenta = '$estado_cuenta',
+                categoria = '$categoria'
+                WHERE id = $id";
+        
+        if ($conn->query($sql)) {
+            $success = "Usuario actualizado exitosamente.";
+        } else {
+            $error = "Error al actualizar usuario: " . $conn->error;
+        }
+    }
+}
+
+// --- CAMBIAR CONTRASEÑA ---
+if (isset($_POST['cambiar_password'])) {
+    $id = intval($_POST['id']);
+    $nueva_password = md5(trim($_POST['nueva_password']));
+    
+    if ($conn->query("UPDATE usuarios SET password = '$nueva_password' WHERE id = $id")) {
+        $success = "Contraseña actualizada exitosamente.";
+    } else {
+        $error = "Error al actualizar contraseña: " . $conn->error;
+    }
+}
+
 // Aprobar dueño y asignar locales
 if (isset($_POST['aprobar'])) {
     $duenio_id = intval($_POST['duenio_id']);
@@ -444,15 +506,65 @@ $total_clientes = $stats_inicial + $stats_medium + $stats_premium;
                   </td>
                   <td><?= date('d/m/Y H:i', strtotime($d['fecha_registro'])) ?></td>
                   <td>
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editModalDuenio<?= $d['id'] ?>">
+                      Editar
+                    </button>
                     <?php if($d['estado_cuenta'] == 'activo'): ?>
-                      <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalAsignarLocales<?= $d['id'] ?>">
+                      <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalAsignarLocales<?= $d['id'] ?>">
                         Asignar Locales
                       </button>
-                    <?php else: ?>
-                      <span class="text-muted">-</span>
                     <?php endif; ?>
+                    <a href="?seccion=duenios&eliminar_usuario=<?= $d['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar este dueño? Se desasignarán todos sus locales.')">
+                      Eliminar
+                    </a>
                   </td>
                 </tr>
+
+                <!-- Modal Editar Dueño -->
+                <div class="modal fade" id="editModalDuenio<?= $d['id'] ?>" tabindex="-1">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Editar Dueño</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+                      <form method="POST" action="?seccion=duenios">
+                        <div class="modal-body">
+                          <input type="hidden" name="id" value="<?= $d['id'] ?>">
+                          <input type="hidden" name="rol" value="duenio">
+                          <input type="hidden" name="categoria" value="inicial">
+                          
+                          <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" name="nombre" class="form-control" value="<?= htmlspecialchars($d['nombre']) ?>" required>
+                          </div>
+                          
+                          <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($d['email']) ?>" required>
+                          </div>
+                          
+                          <div class="mb-3">
+                            <label class="form-label">Estado de Cuenta</label>
+                            <select name="estado_cuenta" class="form-select" required>
+                              <option value="activo" <?= $d['estado_cuenta'] == 'activo' ? 'selected' : '' ?>>Activo</option>
+                              <option value="pendiente" <?= $d['estado_cuenta'] == 'pendiente' ? 'selected' : '' ?>>Pendiente</option>
+                              <option value="denegado" <?= $d['estado_cuenta'] == 'denegado' ? 'selected' : '' ?>>Denegado</option>
+                            </select>
+                          </div>
+
+                          <div class="alert alert-info">
+                            <small><strong>Locales asignados:</strong> <?= $d['total_locales'] ?></small>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                          <button type="submit" name="editar_usuario" class="btn btn-primary">Guardar cambios</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
 
                 <!-- Modal para asignar locales adicionales -->
                 <?php if($d['estado_cuenta'] == 'activo'): ?>
@@ -602,6 +714,7 @@ $total_clientes = $stats_inicial + $stats_medium + $stats_premium;
                 <th>Categoría</th>
                 <th>Estado</th>
                 <th>Fecha Registro</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -629,7 +742,66 @@ $total_clientes = $stats_inicial + $stats_medium + $stats_premium;
                     <?php endif; ?>
                   </td>
                   <td><?= date('d/m/Y H:i', strtotime($c['fecha_registro'])) ?></td>
+                  <td>
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editModalCliente<?= $c['id'] ?>">
+                      Editar
+                    </button>
+                    <a href="?seccion=clientes&eliminar_usuario=<?= $c['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar este cliente?')">
+                      Eliminar
+                    </a>
+                  </td>
                 </tr>
+
+                <!-- Modal Editar Cliente -->
+                <div class="modal fade" id="editModalCliente<?= $c['id'] ?>" tabindex="-1">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Editar Cliente</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+                      <form method="POST" action="?seccion=clientes">
+                        <div class="modal-body">
+                          <input type="hidden" name="id" value="<?= $c['id'] ?>">
+                          <input type="hidden" name="rol" value="cliente">
+                          
+                          <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" name="nombre" class="form-control" value="<?= htmlspecialchars($c['nombre']) ?>" required>
+                          </div>
+                          
+                          <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($c['email']) ?>" required>
+                          </div>
+                          
+                          <div class="mb-3">
+                            <label class="form-label">Estado de Cuenta</label>
+                            <select name="estado_cuenta" class="form-select" required>
+                              <option value="activo" <?= $c['estado_cuenta'] == 'activo' ? 'selected' : '' ?>>Activo</option>
+                              <option value="pendiente" <?= $c['estado_cuenta'] == 'pendiente' ? 'selected' : '' ?>>Pendiente</option>
+                              <option value="denegado" <?= $c['estado_cuenta'] == 'denegado' ? 'selected' : '' ?>>Denegado</option>
+                            </select>
+                          </div>
+                          
+                          <div class="mb-3">
+                            <label class="form-label">Categoría</label>
+                            <select name="categoria" class="form-select">
+                              <option value="inicial" <?= $c['categoria'] == 'inicial' ? 'selected' : '' ?>>Inicial</option>
+                              <option value="medium" <?= $c['categoria'] == 'medium' ? 'selected' : '' ?>>Medium</option>
+                              <option value="premium" <?= $c['categoria'] == 'premium' ? 'selected' : '' ?>>Premium</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                          <button type="submit" name="editar_usuario" class="btn btn-primary">Guardar cambios</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
               <?php endwhile; ?>
             </tbody>
           </table>

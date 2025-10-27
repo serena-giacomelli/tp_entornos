@@ -2,8 +2,7 @@
 // Definir las imágenes estáticas del carousel
 $imagenes_hero = [
     '/imagenes/img1.jpg',
-    '/imagenes/img2.jpg',
-    '/imagenes/img3.jpg'
+    '/imagenes/img2.jpg'
 ];
 ?>
 
