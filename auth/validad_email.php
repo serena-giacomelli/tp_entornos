@@ -3,9 +3,9 @@ include_once("../includes/db.php");
 
 if (isset($_GET['token'])) {
     $token = $_GET['token'];
-    $res = $conn->query("SELECT * FROM usuarios WHERE tokenValidacion='$token' AND rol='cliente'");
+    $res = $conn->query("SELECT * FROM usuarios WHERE token_validacion='$token' AND rol='cliente'");
     if ($res->num_rows > 0) {
-        $conn->query("UPDATE usuarios SET estadoCuenta='activo', tokenValidacion=NULL WHERE tokenValidacion='$token'");
+        $conn->query("UPDATE usuarios SET estado_cuenta='activo', token_validacion=NULL WHERE token_validacion='$token'");
         $mensaje = "✅ Tu cuenta fue activada correctamente. Ya podés iniciar sesión.";
     } else {
         $mensaje = "❌ Token inválido o cuenta ya validada.";

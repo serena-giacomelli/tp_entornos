@@ -1,9 +1,10 @@
 <?php
 session_start();
 include_once("../includes/db.php");
+include_once("../includes/mail_config.php");
 
 // Cargar PHPMailer con Composer
-require '../vendor/autoload.php'; // <-- aquí carga todo automáticamente
+require '../vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -21,35 +22,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 VALUES ('$nombre', '$email', '$password', 'cliente', 'inicial', 'pendiente', '$token')";
         if ($conn->query($sql)) {
 
+            // Generar URL de validación según el entorno
+            $protocolo = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $dominio = $_SERVER['HTTP_HOST'];
+            $url_validacion = "$protocolo://$dominio/auth/validad_email.php?token=$token";
+
             $destinatario = $email;
             $asunto = "Validación de registro - Shopping Promociones";
             $mensaje = "Hola $nombre,\n\nGracias por registrarte en Shopping Promociones.\n
             Para activar tu cuenta hacé clic en el siguiente enlace:\n
-            http://localhost/auth/validar_email.php?token=$token\n\n
+            $url_validacion\n\n
             Atentamente,\nEl equipo del Shopping.";
 
             $mail = new PHPMailer(true);
 
             try {
-                // Detectar entorno
-                if ($_SERVER['SERVER_NAME'] == 'localhost') {
-                    // Local: MailHog
-                    $mail->isSMTP();
-                    $mail->Host = 'localhost';
-                    $mail->Port = 1025;
-                    $mail->SMTPAuth = false;
-                    $mail->setFrom('no-reply@shoppingpromos.com', 'Shopping Promociones');
-                } else {
-                    // Producción: SMTP real
-                    $mail->isSMTP();
-                    $mail->Host = 'smtp.gmail.com';
-                    $mail->SMTPAuth = true;
-                    $mail->Username = 'tuemail@gmail.com';
-                    $mail->Password = 'tu_clave_de_aplicacion';
-                    $mail->SMTPSecure = 'tls';
-                    $mail->Port = 587;
-                    $mail->setFrom('tuemail@gmail.com', 'Shopping Promociones');
-                }
+                // Usar configuración centralizada
+                configurarMail($mail);
 
                 $mail->addAddress($destinatario, $nombre);
                 $mail->Subject = $asunto;
