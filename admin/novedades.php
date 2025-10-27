@@ -28,8 +28,79 @@ if (isset($_GET['eliminar'])) {
     $conn->query("DELETE FROM novedades WHERE id=$id");
 }
 
-// Consultar todas las novedades (incluyendo las vencidas para gestión)
-$novedades = $conn->query("SELECT * FROM novedades ORDER BY fecha_publicacion DESC");
+// --- FILTROS Y ORDENAMIENTO ---
+$where_conditions = [];
+$params_url = [];
+
+// Filtro por categoría
+if (isset($_GET['categoria']) && !empty($_GET['categoria'])) {
+    $categoria_filter = $conn->real_escape_string($_GET['categoria']);
+    $where_conditions[] = "categoria_destino='$categoria_filter'";
+    $params_url[] = "categoria=$categoria_filter";
+}
+
+// Filtro por estado (vigente/vencida)
+if (isset($_GET['estado']) && !empty($_GET['estado'])) {
+    $estado_filter = $_GET['estado'];
+    if ($estado_filter == 'vigente') {
+        $where_conditions[] = "(fecha_vencimiento IS NULL OR fecha_vencimiento >= CURDATE())";
+    } elseif ($estado_filter == 'vencida') {
+        $where_conditions[] = "fecha_vencimiento < CURDATE()";
+    }
+    $params_url[] = "estado=$estado_filter";
+}
+
+// Búsqueda por título o contenido
+if (isset($_GET['buscar']) && !empty($_GET['buscar'])) {
+    $buscar = $conn->real_escape_string($_GET['buscar']);
+    $where_conditions[] = "(titulo LIKE '%$buscar%' OR contenido LIKE '%$buscar%')";
+    $params_url[] = "buscar=$buscar";
+}
+
+// Construir WHERE clause
+$where_sql = "";
+if (count($where_conditions) > 0) {
+    $where_sql = "WHERE " . implode(" AND ", $where_conditions);
+}
+
+// Ordenamiento
+$orden = isset($_GET['orden']) ? $_GET['orden'] : 'fecha_desc';
+$order_sql = "ORDER BY ";
+switch ($orden) {
+    case 'id_asc':
+        $order_sql .= "id ASC";
+        break;
+    case 'id_desc':
+        $order_sql .= "id DESC";
+        break;
+    case 'titulo_asc':
+        $order_sql .= "titulo ASC";
+        break;
+    case 'titulo_desc':
+        $order_sql .= "titulo DESC";
+        break;
+    case 'fecha_asc':
+        $order_sql .= "fecha_publicacion ASC";
+        break;
+    case 'fecha_desc':
+        $order_sql .= "fecha_publicacion DESC";
+        break;
+    case 'vencimiento_asc':
+        $order_sql .= "fecha_vencimiento ASC";
+        break;
+    case 'vencimiento_desc':
+        $order_sql .= "fecha_vencimiento DESC";
+        break;
+    default:
+        $order_sql .= "fecha_publicacion DESC";
+}
+$params_url[] = "orden=$orden";
+
+// Construir URL para mantener filtros
+$params_url_string = implode("&", $params_url);
+
+// Consultar novedades con filtros
+$novedades = $conn->query("SELECT * FROM novedades $where_sql $order_sql");
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -54,6 +125,57 @@ $novedades = $conn->query("SELECT * FROM novedades ORDER BY fecha_publicacion DE
     <div>
       <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#modalAgregar">Nueva Novedad</button>
       <a href="admin.php" class="btn btn-secondary">Volver al Panel</a>
+    </div>
+  </div>
+
+  <!-- Filtros y Ordenamiento -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header" style="background-color: var(--light);">
+      <h5 class="mb-0">Filtros y Ordenamiento</h5>
+    </div>
+    <div class="card-body">
+      <form method="GET" class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Buscar:</label>
+          <input type="text" name="buscar" class="form-control" 
+                 placeholder="Título o contenido..." 
+                 value="<?= htmlspecialchars($_GET['buscar'] ?? '') ?>">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Categoría:</label>
+          <select name="categoria" class="form-select">
+            <option value="">Todas</option>
+            <option value="inicial" <?= (isset($_GET['categoria']) && $_GET['categoria'] == 'inicial') ? 'selected' : '' ?>>Inicial</option>
+            <option value="medium" <?= (isset($_GET['categoria']) && $_GET['categoria'] == 'medium') ? 'selected' : '' ?>>Medium</option>
+            <option value="premium" <?= (isset($_GET['categoria']) && $_GET['categoria'] == 'premium') ? 'selected' : '' ?>>Premium</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-bold">Estado:</label>
+          <select name="estado" class="form-select">
+            <option value="">Todos</option>
+            <option value="vigente" <?= (isset($_GET['estado']) && $_GET['estado'] == 'vigente') ? 'selected' : '' ?>>Vigente</option>
+            <option value="vencida" <?= (isset($_GET['estado']) && $_GET['estado'] == 'vencida') ? 'selected' : '' ?>>Vencida</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold">Ordenar por:</label>
+          <select name="orden" class="form-select">
+            <option value="fecha_desc" <?= ($orden == 'fecha_desc') ? 'selected' : '' ?>>Fecha publicación (Más reciente)</option>
+            <option value="fecha_asc" <?= ($orden == 'fecha_asc') ? 'selected' : '' ?>>Fecha publicación (Más antigua)</option>
+            <option value="vencimiento_asc" <?= ($orden == 'vencimiento_asc') ? 'selected' : '' ?>>Vencimiento (Próximo a vencer)</option>
+            <option value="vencimiento_desc" <?= ($orden == 'vencimiento_desc') ? 'selected' : '' ?>>Vencimiento (Más lejano)</option>
+            <option value="titulo_asc" <?= ($orden == 'titulo_asc') ? 'selected' : '' ?>>Título (A-Z)</option>
+            <option value="titulo_desc" <?= ($orden == 'titulo_desc') ? 'selected' : '' ?>>Título (Z-A)</option>
+            <option value="id_desc" <?= ($orden == 'id_desc') ? 'selected' : '' ?>>ID (Más reciente)</option>
+            <option value="id_asc" <?= ($orden == 'id_asc') ? 'selected' : '' ?>>ID (Más antiguo)</option>
+          </select>
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary">Aplicar Filtros</button>
+          <a href="novedades.php" class="btn btn-secondary">Limpiar</a>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -97,7 +219,7 @@ $novedades = $conn->query("SELECT * FROM novedades ORDER BY fecha_publicacion DE
         <tr class="<?= $esta_vencida ? 'table-secondary' : '' ?>">
           <td><strong>#<?= $n['id'] ?></strong></td>
           <td><?= htmlspecialchars($n['titulo']) ?></td>
-          <td><?= htmlspecialchars($n['contenido']) ?></td>
+          <td><?= htmlspecialchars(substr($n['contenido'], 0, 80)) ?>...</td>
           <td><span class="badge bg-<?= $badge_color ?>"><?= ucfirst($n['categoria_destino']) ?></span></td>
           <td><?= date("d/m/Y", strtotime($n['fecha_publicacion'])) ?></td>
           <td>
@@ -115,7 +237,11 @@ $novedades = $conn->query("SELECT * FROM novedades ORDER BY fecha_publicacion DE
             <?php endif; ?>
           </td>
           <td>
-            <a href="?eliminar=<?= $n['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar esta novedad?')">Eliminar</a>
+            <a href="?eliminar=<?= $n['id'] ?>&<?= $params_url_string ?>" 
+               class="btn btn-danger btn-sm" 
+               onclick="return confirm('¿Eliminar esta novedad?')">
+              Eliminar
+            </a>
           </td>
         </tr>
       <?php endwhile; ?>

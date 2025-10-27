@@ -14,11 +14,25 @@ $id = $_SESSION['usuario_id'];
 $result = $conn->query("SELECT * FROM usuarios WHERE id=$id");
 $cliente = $result->fetch_assoc();
 
-// Contar promociones solicitadas
-$count_promos = $conn->query("SELECT COUNT(*) as total FROM uso_promociones WHERE id_cliente=$id")->fetch_assoc();
-
 // --- CONTAR USOS ACEPTADOS PARA SISTEMA DE PUNTOS ---
 $usos_aceptados = $conn->query("SELECT COUNT(*) as total FROM uso_promociones WHERE id_cliente=$id AND estado='aceptada'")->fetch_assoc()['total'];
+
+// Obtener historial de promociones usadas (aceptadas)
+$historial_promociones = $conn->query("
+    SELECT 
+        up.id,
+        up.fecha_uso,
+        up.estado,
+        p.titulo as promo_titulo,
+        p.descripcion,
+        p.categoria_minima as categoria,
+        l.nombre as local_nombre
+    FROM uso_promociones up
+    JOIN promociones p ON up.id_promo = p.id
+    JOIN locales l ON p.id_local = l.id
+    WHERE up.id_cliente = $id
+    ORDER BY up.fecha_uso DESC
+");
 
 // Calcular progreso hacia siguiente categoría
 $categoria_actual = $cliente['categoria'];
@@ -115,7 +129,6 @@ if (isset($_POST['guardar'])) {
               <?= strtoupper($categoria_actual) ?>
             </span>
           </p>
-          <p><strong>Promociones solicitadas:</strong> <?= $count_promos['total'] ?></p>
         </div>
       </div>
       
@@ -123,7 +136,7 @@ if (isset($_POST['guardar'])) {
       <hr>
       <div class="mt-3">
         <h6 class="mb-3">
-          <strong>🏆 Sistema de Puntos</strong>
+          <strong>Sistema de Puntos</strong>
         </h6>
         
         <div class="row mb-3">
@@ -133,8 +146,16 @@ if (isset($_POST['guardar'])) {
               <span class="badge bg-success"><?= $usos_aceptados ?> aceptadas</span>
             </p>
           </div>
-          <?php if ($categoria_actual != 'premium'): ?>
-            <div class="col-md-6">
+          <div class="col-md-6">
+            <button type="button" class="btn btn-sm" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: white; border: none;" data-bs-toggle="modal" data-bs-target="#historialModal">
+              Ver Historial de Promociones
+            </button>
+          </div>
+        </div>
+
+        <?php if ($categoria_actual != 'premium'): ?>
+          <div class="row mb-3">
+            <div class="col-md-12">
               <p class="mb-1">
                 <strong>Para siguiente nivel:</strong>
                 <span class="badge bg-primary">
@@ -142,8 +163,8 @@ if (isset($_POST['guardar'])) {
                 </span>
               </p>
             </div>
-          <?php endif; ?>
-        </div>
+          </div>
+        <?php endif; ?>
 
         <?php if ($categoria_actual != 'premium'): ?>
           <!-- Barra de Progreso -->
@@ -175,7 +196,7 @@ if (isset($_POST['guardar'])) {
         <?php else: ?>
           <!-- Ya es Premium -->
           <div class="alert alert-warning text-center mb-0">
-            <strong>👑 ¡Felicitaciones!</strong><br>
+            <strong>Felicitaciones!</strong><br>
             Has alcanzado la categoría máxima: <strong>PREMIUM</strong><br>
             <small>Disfruta de todos los beneficios exclusivos</small>
           </div>
@@ -241,6 +262,89 @@ if (isset($_POST['guardar'])) {
 
 </div>
 </main>
+
+  </div>
+</div>
+
+<!-- Modal para Historial de Promociones -->
+<div class="modal fade" id="historialModal" tabindex="-1" aria-labelledby="historialModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header text-white" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));">
+        <h5 class="modal-title" id="historialModalLabel">Historial de Promociones</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <?php if($historial_promociones->num_rows > 0): ?>
+          <div class="alert alert-info">
+            <strong>Total de solicitudes:</strong> <?= $historial_promociones->num_rows ?>
+          </div>
+          
+          <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+              <thead class="table-light">
+                <tr>
+                  <th>Fecha de Uso</th>
+                  <th>Promoción</th>
+                  <th>Descripción</th>
+                  <th>Local</th>
+                  <th>Categoría Requerida</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php while($promo = $historial_promociones->fetch_assoc()): ?>
+                  <tr>
+                    <td>
+                      <strong><?= date('d/m/Y', strtotime($promo['fecha_uso'])) ?></strong>
+                    </td>
+                    <td><strong><?= htmlspecialchars($promo['promo_titulo']) ?></strong></td>
+                    <td>
+                      <small><?= htmlspecialchars(substr($promo['descripcion'], 0, 100)) ?><?= strlen($promo['descripcion']) > 100 ? '...' : '' ?></small>
+                    </td>
+                    <td><?= htmlspecialchars($promo['local_nombre']) ?></td>
+                    <td>
+                      <?php
+                      $cat_badge = match($promo['categoria']) {
+                          'premium' => 'bg-warning text-dark',
+                          'medium' => 'bg-info',
+                          default => 'bg-secondary'
+                      };
+                      ?>
+                      <span class="badge <?= $cat_badge ?>">
+                        <?= ucfirst($promo['categoria']) ?>
+                      </span>
+                    </td>
+                    <td>
+                      <?php if($promo['estado'] == 'aceptada'): ?>
+                        <span class="badge bg-success">Aceptada</span>
+                      <?php elseif($promo['estado'] == 'rechazada'): ?>
+                        <span class="badge bg-danger">Rechazada</span>
+                      <?php else: ?>
+                        <span class="badge bg-warning text-dark">Enviada</span>
+                      <?php endif; ?>
+                    </td>
+                  </tr>
+                <?php endwhile; ?>
+              </tbody>
+            </table>
+          </div>
+        <?php else: ?>
+          <div class="alert alert-warning text-center">
+            <strong>No has utilizado ninguna promoción aún</strong><br>
+            <small>Explora las promociones disponibles y comienza a disfrutar de descuentos exclusivos</small>
+          </div>
+          <div class="text-center mt-3">
+            <a href="../promociones.php" class="btn btn-primary">Ver Promociones Disponibles</a>
+          </div>
+        <?php endif; ?>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Modal para Editar Perfil -->
 <div class="modal fade" id="editarPerfilModal" tabindex="-1" aria-labelledby="editarPerfilModalLabel" aria-hidden="true">

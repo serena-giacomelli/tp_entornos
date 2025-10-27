@@ -2,8 +2,8 @@
 session_start();
 include_once("../includes/db.php");
 
-// Cargar PHPMailer con Composer
 require '../vendor/autoload.php';
+require '../includes/mail_config.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -54,30 +54,13 @@ if (isset($_GET['accion']) && isset($_GET['id'])) {
                 $mail = new PHPMailer(true);
                 
                 try {
-                    // Configuración según entorno
-                    if ($_SERVER['SERVER_NAME'] == 'localhost') {
-                        // Local: MailHog
-                        $mail->isSMTP();
-                        $mail->Host = 'localhost';
-                        $mail->Port = 1025;
-                        $mail->SMTPAuth = false;
-                        $mail->setFrom('no-reply@ofertopolis.com', 'Ofertópolis');
-                    } else {
-                        // Producción: SMTP real
-                        $mail->isSMTP();
-                        $mail->Host = 'smtp.gmail.com';
-                        $mail->SMTPAuth = true;
-                        $mail->Username = 'tuemail@gmail.com';
-                        $mail->Password = 'tu_clave_de_aplicacion';
-                        $mail->SMTPSecure = 'tls';
-                        $mail->Port = 587;
-                        $mail->setFrom('notificaciones@ofertopolis.com', 'Ofertópolis');
-                    }
+                    // Configuración de email
+                    configurarMail($mail);
 
                     $mail->addAddress($cliente_info['email'], $cliente_info['nombre']);
-                    $mail->Subject = '🎉 ¡Felicitaciones! Has subido de categoría';
+                    $mail->Subject = '¡Felicitaciones! Has subido de categoría';
                     $mail->Body = "Hola {$cliente_info['nombre']},\n\n" .
-                                  "¡Tenemos excelentes noticias! 🎊\n\n" .
+                                  "¡Tenemos excelentes noticias!\n\n" .
                                   "Has alcanzado {$count} usos de promociones y has sido actualizado a la categoría:\n\n" .
                                   "🏆 " . strtoupper($nueva_categoria) . "\n\n" .
                                   "Ahora tendrás acceso a más beneficios y promociones exclusivas.\n\n" .
@@ -92,19 +75,26 @@ if (isset($_GET['accion']) && isset($_GET['id'])) {
                 }
             }
             
-            $success_message = "Solicitud aceptada exitosamente. El cliente ahora tiene $count usos.";
+            $success_message = "Solicitud aceptada exitosamente";
         } else {
-            $success_message = "Solicitud rechazada.";
+            $success_message = "Solicitud rechazada";
         }
     }
 }
 
+// --- Contar solicitudes pendientes ---
+$pendientes = $conn->query("SELECT COUNT(*) AS total 
+                            FROM uso_promociones u
+                            JOIN promociones p ON u.id_promo = p.id
+                            JOIN locales l ON p.id_local = l.id
+                            WHERE l.id_duenio = $idduenio AND u.estado = 'enviada'")->fetch_assoc();
+
 // --- Listar solicitudes ---
-$sql = "SELECT u.id, c.nombre AS cliente, p.descripcion, l.nombre, u.estado 
+$sql = "SELECT u.id, c.nombre AS cliente, p.titulo AS promo_titulo, p.descripcion, l.nombre, u.estado, u.fecha_uso 
         FROM uso_promociones u
         JOIN usuarios c ON u.id_cliente = c.id
         JOIN promociones p ON u.id_promo = p.id
-        JOIN locales l ON p.id = l.id
+        JOIN locales l ON p.id_local = l.id
         WHERE l.id_duenio = $idduenio
         ORDER BY u.id DESC";
 
@@ -114,13 +104,42 @@ $res = $conn->query($sql);
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Solicitudes de Promociones</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solicitudes de Promociones - OFERTÓPOLIS</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="../css/estilos.css" rel="stylesheet">
+<link href="../css/header.css" rel="stylesheet">
+<link href="../css/footer.css" rel="stylesheet">
+<link href="../css/panels.css" rel="stylesheet">
 </head>
-<body class="bg-light">
-<div class="container mt-4">
-  <h3 class="mb-3">Solicitudes Recibidas</h3>
-  <a href="duenio.php" class="btn btn-secondary mb-3">Volver al panel</a>
+<body>
+
+<?php include("../includes/header.php"); ?>
+
+<main id="main-content" class="main-content">
+<div class="container mt-4 mb-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 style="color: var(--primary-color); font-weight: 700;">Solicitudes Recibidas</h3>
+    <a href="duenio.php" class="btn btn-secondary">← Volver al panel</a>
+  </div>
+
+  <!-- Contador de solicitudes pendientes -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body" style="background: linear-gradient(135deg, rgba(113, 0, 20, 0.05), rgba(113, 0, 20, 0.02));">
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <h5 class="mb-0" style="color: var(--primary-color);">
+            Total de solicitudes: <span class="badge bg-primary"><?= $res ? $res->num_rows : 0 ?></span>
+          </h5>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <h5 class="mb-0" style="color: var(--primary-color);">
+            Pendientes: <span class="badge bg-warning text-dark"><?= $pendientes['total'] ?></span>
+          </h5>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <?php if(isset($success_message)): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -131,56 +150,87 @@ $res = $conn->query($sql);
   
   <?php if(isset($upgrade_message)): ?>
     <div class="alert alert-info alert-dismissible fade show" role="alert">
-      <strong>🎉 Upgrade de categoría:</strong> <?= $upgrade_message ?>
+      <strong> Upgrade de categoría:</strong> <?= $upgrade_message ?>
       <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
   <?php endif; ?>
 
-  <table class="table table-striped table-bordered">
-    <thead class="table-dark">
-      <tr>
-        <th>Cliente</th>
-        <th>Promoción</th>
-        <th>Local</th>
-        <th>Estado</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php while ($row = $res->fetch_assoc()): ?>
-      <tr>
-        <td><?= htmlspecialchars($row['cliente']) ?></td>
-        <td><?= htmlspecialchars($row['descripcion']) ?></td>
-        <td><?= htmlspecialchars($row['nombre']) ?></td>
-        <td>
-          <?php if($row['estado'] == 'enviada'): ?>
-            <span class="badge bg-warning">⏳ Pendiente</span>
-          <?php elseif($row['estado'] == 'aceptada'): ?>
-            <span class="badge bg-success">✅ Aceptada</span>
-          <?php else: ?>
-            <span class="badge bg-danger">❌ Rechazada</span>
-          <?php endif; ?>
-        </td>
-        <td>
-          <?php if ($row['estado'] == 'enviada'): ?>
-            <a href="?accion=aceptada&id=<?= $row['id'] ?>" 
-               class="btn btn-success btn-sm"
-               onclick="return confirm('¿Aceptar esta solicitud? El cliente sumará puntos.')">
-              ✅ Aceptar
-            </a>
-            <a href="?accion=rechazada&id=<?= $row['id'] ?>" 
-               class="btn btn-danger btn-sm"
-               onclick="return confirm('¿Rechazar esta solicitud?')">
-              ❌ Rechazar
-            </a>
-          <?php else: ?>
-            <span class="text-muted">Finalizada</span>
-          <?php endif; ?>
-        </td>
-      </tr>
-      <?php endwhile; ?>
-    </tbody>
-  </table>
+  <!-- Tabla de solicitudes -->
+  <div class="card shadow-sm">
+    <div class="card-header text-white" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));">
+      <h5 class="mb-0">Lista de Solicitudes</h5>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead style="background-color: var(--light);">
+            <tr>
+              <th>ID</th>
+              <th>Cliente</th>
+              <th>Promoción</th>
+              <th>Local</th>
+              <th>Fecha Solicitud</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+      <?php if($res && $res->num_rows > 0): ?>
+        <?php while ($row = $res->fetch_assoc()): ?>
+        <tr>
+          <td><strong>#<?= $row['id'] ?></strong></td>
+          <td><?= htmlspecialchars($row['cliente']) ?></td>
+          <td>
+            <strong style="color: var(--primary-color);"><?= htmlspecialchars($row['promo_titulo']) ?></strong><br>
+            <small class="text-muted"><?= htmlspecialchars(substr($row['descripcion'], 0, 50)) ?>...</small>
+          </td>
+          <td><?= htmlspecialchars($row['nombre']) ?></td>
+          <td><?= $row['fecha_uso'] ? date('d/m/Y H:i', strtotime($row['fecha_uso'])) : 'N/A' ?></td>
+          <td>
+            <?php if($row['estado'] == 'enviada'): ?>
+              <span class="badge bg-warning text-dark">⏳ Pendiente</span>
+            <?php elseif($row['estado'] == 'aceptada'): ?>
+              <span class="badge bg-success">✓ Aceptada</span>
+            <?php else: ?>
+              <span class="badge bg-danger">✗ Rechazada</span>
+            <?php endif; ?>
+          </td>
+          <td>
+            <?php if ($row['estado'] == 'enviada'): ?>
+              <a href="?accion=aceptada&id=<?= $row['id'] ?>" 
+                 class="btn btn-success btn-sm mb-1"
+                 onclick="return confirm('¿Aceptar esta solicitud? El cliente sumará puntos.')">
+                ✓ Aceptar
+              </a>
+              <a href="?accion=rechazada&id=<?= $row['id'] ?>" 
+                 class="btn btn-danger btn-sm mb-1"
+                 onclick="return confirm('¿Rechazar esta solicitud?')">
+                ✗ Rechazar
+              </a>
+            <?php else: ?>
+              <span class="badge" style="background-color: var(--light); color: var(--dark);">Finalizada</span>
+            <?php endif; ?>
+          </td>
+        </tr>
+        <?php endwhile; ?>
+      <?php else: ?>
+        <tr>
+          <td colspan="7" class="text-center" style="padding: 3rem;">
+            <div style="color: var(--primary-color); font-size: 3rem; margin-bottom: 1rem;">📭</div>
+            <p class="text-muted mb-0">No hay solicitudes de promociones</p>
+          </td>
+        </tr>
+      <?php endif; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
+</main>
+
+<?php include("../includes/footer.php"); ?>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
