@@ -12,13 +12,13 @@
     <!-- Enlaces rápidos -->
     <div class="footer-section">
       <h4>Enlaces Rápidos</h4>
-      <a href="/tp_eg/index.php">Inicio</a>
+      <a href="/index.php">Inicio</a>
       <?php if (!isset($_SESSION['usuario_id'])): ?>
-        <a href="/tp_eg/auth/login.php">Iniciar Sesión</a>
-        <a href="/tp_eg/auth/register_cliente.php">Registrarse como Cliente</a>
-        <a href="/tp_eg/auth/register_duenio.php">Registrarse como Dueño</a>
+        <a href="/auth/login.php">Iniciar Sesión</a>
+        <a href="/auth/register_cliente.php">Registrarse como Cliente</a>
+        <a href="/auth/register_duenio.php">Registrarse como Dueño</a>
       <?php endif; ?>
-      <a href="/tp_eg/contacto.php">Contacto</a>
+      <a href="/contacto.php">Contacto</a>
     </div>
 
     <!-- Horarios -->

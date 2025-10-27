@@ -16,7 +16,7 @@ if (session_status() === PHP_SESSION_NONE) {
     </button>
 
     <!-- Logo central -->
-    <a href="/tp_eg/index.php" class="logo-central" aria-label="Ir a página principal">
+    <a href="/index.php" class="logo-central" aria-label="Ir a página principal">
       O F E R T Ó P O L I S
     </a>
 
@@ -57,31 +57,31 @@ if (session_status() === PHP_SESSION_NONE) {
         <!-- Dropdown de perfil -->
         <div class="profile-dropdown" id="profileDropdown" role="menu">
           <?php if ($_SESSION['usuario_rol'] == 'admin'): ?>
-            <a href="/tp_eg/admin/admin.php" class="dropdown-item" role="menuitem">
+            <a href="/admin/admin.php" class="dropdown-item" role="menuitem">
               Panel de Administración
             </a>
           <?php elseif ($_SESSION['usuario_rol'] == 'duenio'): ?>
-            <a href="/tp_eg/duenio/duenio.php" class="dropdown-item" role="menuitem">
+            <a href="/duenio/duenio.php" class="dropdown-item" role="menuitem">
               Panel de Dueño
             </a>
-            <a href="/tp_eg/duenio/solicitudes.php" class="dropdown-item" role="menuitem">
+            <a href="/duenio/solicitudes.php" class="dropdown-item" role="menuitem">
               Solicitudes
             </a>
-            <a href="/tp_eg/duenio/reportes.php" class="dropdown-item" role="menuitem">
+            <a href="/duenio/reportes.php" class="dropdown-item" role="menuitem">
               Reportes
             </a>
           <?php elseif ($_SESSION['usuario_rol'] == 'cliente'): ?>
-            <a href="/tp_eg/cliente/cliente.php" class="dropdown-item" role="menuitem">
+            <a href="/cliente/cliente.php" class="dropdown-item" role="menuitem">
               Mi Panel
             </a>
           <?php endif; ?>
-          <a href="/tp_eg/auth/logout.php" class="dropdown-item danger" role="menuitem">
+          <a href="/auth/logout.php" class="dropdown-item danger" role="menuitem">
             Cerrar Sesión
           </a>
         </div>
       <?php else: ?>
         <!-- Usuario no logueado -->
-        <a href="/tp_eg/auth/login.php" class="btn btn-primary-custom btn-login-header">
+        <a href="/auth/login.php" class="btn btn-primary-custom btn-login-header">
           Iniciar Sesión
         </a>
       <?php endif; ?>
@@ -102,44 +102,44 @@ if (session_status() === PHP_SESSION_NONE) {
 
   <div class="sidebar-nav">
     <!-- Enlaces públicos -->
-    <a href="/tp_eg/index.php" class="sidebar-nav-item">
+    <a href="/index.php" class="sidebar-nav-item">
       <span>Inicio</span>
     </a>
 
     <?php if (isset($_SESSION['usuario_id'])): ?>
       <!-- Mi Panel según rol -->
       <?php if ($_SESSION['usuario_rol'] == 'admin'): ?>
-        <a href="/tp_eg/admin/admin.php" class="sidebar-nav-item">
+        <a href="/admin/admin.php" class="sidebar-nav-item">
           <span>Mi Panel</span>
         </a>
       <?php elseif ($_SESSION['usuario_rol'] == 'duenio'): ?>
-        <a href="/tp_eg/duenio/duenio.php" class="sidebar-nav-item">
+        <a href="/duenio/duenio.php" class="sidebar-nav-item">
           <span>Mi Panel</span>
         </a>
       <?php elseif ($_SESSION['usuario_rol'] == 'cliente'): ?>
-        <a href="/tp_eg/cliente/cliente.php" class="sidebar-nav-item">
+        <a href="/cliente/cliente.php" class="sidebar-nav-item">
           <span>Mi Panel</span>
         </a>
       <?php endif; ?>
     <?php endif; ?>
 
     <!-- Promociones y Novedades (visibles para todos) -->
-    <a href="/tp_eg/promociones.php" class="sidebar-nav-item">
+    <a href="/promociones.php" class="sidebar-nav-item">
       <span>Promociones</span>
     </a>
-    <a href="/tp_eg/novedades.php" class="sidebar-nav-item">
+    <a href="/novedades.php" class="sidebar-nav-item">
       <span>Novedades</span>
     </a>
-    <a href="/tp_eg/locales.php" class="sidebar-nav-item">
+    <a href="/locales.php" class="sidebar-nav-item">
       <span>Locales</span>
     </a>
     
-    <a href="/tp_eg/contacto.php" class="sidebar-nav-item">
+    <a href="/contacto.php" class="sidebar-nav-item">
       <span>Contacto</span>
     </a>
 
     <?php if (isset($_SESSION['usuario_id'])): ?>
-      <a href="/tp_eg/auth/logout.php" class="sidebar-nav-item sidebar-nav-logout">
+      <a href="/auth/logout.php" class="sidebar-nav-item sidebar-nav-logout">
         <span>Cerrar Sesión</span>
       </a>
     <?php endif; ?>

@@ -25,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $asunto = "Validación de registro - Shopping Promociones";
             $mensaje = "Hola $nombre,\n\nGracias por registrarte en Shopping Promociones.\n
             Para activar tu cuenta hacé clic en el siguiente enlace:\n
-            http://localhost/tp_eg/auth/validar_email.php?token=$token\n\n
+            http://localhost/auth/validar_email.php?token=$token\n\n
             Atentamente,\nEl equipo del Shopping.";
 
             $mail = new PHPMailer(true);
