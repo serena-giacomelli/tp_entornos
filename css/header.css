@@ -1,4 +1,3 @@
-
 .header-fixed {
   position: fixed;
   top: 0;
@@ -51,15 +50,19 @@
 
 /* Logo central */
 .logo-central {
-  font-size: 72px;
+  font-size: clamp(24px, 8vw, 72px); /* Tamaño responsive con clamp */
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: clamp(0.5px, 0.3vw, 2px); /* Letter spacing responsive */
   color: var(--dark);
   text-decoration: none;
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   transition: color var(--transition-speed);
+  white-space: nowrap; /* Evita que se parta en dos líneas */
+  max-width: 90%; /* No exceder el 90% del contenedor */
+  overflow: hidden; /* Si es muy largo, cortar */
+  text-overflow: ellipsis; /* Añadir ... si es necesario */
 }
 
 .logo-central:hover {
@@ -322,8 +325,8 @@
   }
   
   .logo-central {
-    font-size: 48px;
-    letter-spacing: 1px;
+    font-size: clamp(20px, 6vw, 48px); /* Más pequeño en tablets */
+    letter-spacing: clamp(0.3px, 0.2vw, 1px);
   }
   
   .profile-info {
@@ -337,6 +340,17 @@
   }
   
   .logo-central {
-    font-size: 36px;
+    font-size: clamp(16px, 5vw, 36px); /* Aún más pequeño en móviles */
+    letter-spacing: clamp(0.2px, 0.1vw, 0.5px);
+    max-width: 85%; /* Un poco menos de ancho en móviles */
+  }
+}
+
+/* Media query adicional para pantallas muy pequeñas */
+@media (max-width: 320px) {
+  .logo-central {
+    font-size: clamp(14px, 4.5vw, 28px); /* Muy pequeño para móviles antiguos */
+    letter-spacing: 0.1px;
+    max-width: 80%;
   }
 }
