@@ -1,5 +1,11 @@
 <?php
 include_once("includes/db.php");
+include_once("includes/mail_config.php");
+
+// Cargar PHPMailer
+require 'vendor/autoload.php';
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $nombre = trim($_POST['nombre']);
@@ -9,7 +15,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   if ($nombre && $email && $mensaje) {
     $sql = "INSERT INTO contactos (nombre, email, mensaje) VALUES ('$nombre', '$email', '$mensaje')";
     if ($conn->query($sql)) {
-      $ok = "Mensaje enviado correctamente. El administrador responderá a la brevedad.";
+      
+      // Enviar email al administrador
+      $mail = new PHPMailer(true);
+      
+      try {
+        configurarMail($mail);
+        
+        // Email del administrador (puedes cambiarlo)
+        $admin_email = "lusechi3@gmail.com";
+        
+        $mail->addAddress($admin_email, 'Administrador Ofertópolis');
+        $mail->addReplyTo($email, $nombre);
+        
+        $mail->Subject = "Nuevo mensaje de contacto - Ofertópolis";
+        $mail->Body = "Has recibido un nuevo mensaje de contacto:\n\n" .
+                      "Nombre: $nombre\n" .
+                      "Email: $email\n" .
+                      "Mensaje:\n$mensaje\n\n" .
+                      "---\n" .
+                      "Este mensaje fue enviado desde el formulario de contacto de Ofertópolis.";
+        
+        $mail->send();
+        $ok = "Mensaje enviado correctamente. El administrador responderá a la brevedad.";
+        
+      } catch (Exception $e) {
+        $ok = "Mensaje guardado, pero no se pudo enviar la notificación por email. Error: {$mail->ErrorInfo}";
+      }
+      
     } else {
       $error = "Error al guardar mensaje: " . $conn->error;
     }
@@ -171,31 +204,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             Volver al Inicio
           </a>
         </form>
-
-        <!-- Información de contacto adicional -->
-        <div class="contact-info">
-          <h6 class="fw-bold mb-3" style="color: var(--primary-color);">También puedes contactarnos por:</h6>
-          
-          <div class="contact-info-item">
-            <span class="contact-info-icon">📧</span>
-            <span><strong>Email:</strong> info@ofertopolis.com</span>
-          </div>
-          
-          <div class="contact-info-item">
-            <span class="contact-info-icon">📱</span>
-            <span><strong>Teléfono:</strong> (011) 4567-8900</span>
-          </div>
-          
-          <div class="contact-info-item">
-            <span class="contact-info-icon">📍</span>
-            <span><strong>Dirección:</strong> Av. Principal 1234, Buenos Aires</span>
-          </div>
-          
-          <div class="contact-info-item">
-            <span class="contact-info-icon">🕒</span>
-            <span><strong>Horario:</strong> Lun a Sáb 10:00 - 22:00</span>
-          </div>
-        </div>
       </div>
     </div>
   </div>
