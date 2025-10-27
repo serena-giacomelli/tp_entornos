@@ -5,19 +5,16 @@ if (defined('DB_CONNECTED')) {
 }
 define('DB_CONNECTED', true);
 
-$host = "localhost";
-$usuario = "serenita";
-$contrasenia = "serenita";
-$base_datos = "ofertopolis";
-$puerto = 3306;
+// Incluir configuración de base de datos
+require_once(__DIR__ . '/db_config.php');
 
 // Verificar que la clase mysqli exista
 if (!class_exists('mysqli')) {
     die("La extensión MySQLi no está habilitada en PHP.");
 }
 
-// Crear la conexión
-$conn = new mysqli($host, $usuario, $contrasenia, $base_datos, $puerto);
+// Crear la conexión usando las constantes de db_config.php
+$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
 // Verificar errores de conexión
 if ($conn->connect_error) {
