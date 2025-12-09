@@ -1,8 +1,10 @@
 <?php
 session_start();
 include_once("../includes/db.php");
+require_once("../vendor/autoload.php"); // Cargar PHPMailer
 require_once("../includes/mail_config.php");
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']);
@@ -29,6 +31,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $mail = new PHPMailer(true);
                 
                 try {
+                    // Habilitar debug en desarrollo (comentar en producción)
+                    // $mail->SMTPDebug = 2;
+                    
                     configurarMail($mail);
                     
                     $mail->addAddress($email, $usuario['nombre']);
@@ -61,7 +66,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $mail->send();
                     $mensajeOK = "Se ha enviado un correo con las instrucciones para recuperar tu contraseña. Revisá tu bandeja de entrada.";
                 } catch (Exception $e) {
-                    $error = "Error al enviar el correo. Por favor, intenta nuevamente más tarde. Detalle: " . $mail->ErrorInfo;
+                    // Mostrar el error completo para debugging
+                    $error = "Error al enviar el correo: " . $e->getMessage() . " | " . $mail->ErrorInfo;
                 }
             } else {
                 $error = "Error al procesar la solicitud. Intenta nuevamente.";
