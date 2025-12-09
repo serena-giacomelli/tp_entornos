@@ -7,57 +7,75 @@ use PHPMailer\PHPMailer\PHPMailer;
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']);
     
-    // Verificar si el email existe
-    $check = $conn->query("SELECT * FROM usuarios WHERE email='$email'");
-    
-    if ($check->num_rows > 0) {
-        $usuario = $check->fetch_assoc();
+    if (!empty($email)) {
+        // Verificar si el email existe usando prepared statement
+        $stmt = $conn->prepare("SELECT id, nombre, email FROM usuarios WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
         
-        // Generar token único
-        $token = bin2hex(random_bytes(32));
-        $expiracion = date('Y-m-d H:i:s', strtotime('+1 hour')); // Token válido por 1 hora
-        
-        // Guardar token en la base de datos
-        $sql = "UPDATE usuarios SET token_validacion='$token' WHERE email='$email'";
-        
-        if ($conn->query($sql)) {
-            // Enviar email con el enlace de recuperación
-            $mail = new PHPMailer(true);
+        if ($result->num_rows > 0) {
+            $usuario = $result->fetch_assoc();
             
-            try {
-                configurarMail($mail);
+            // Generar token único
+            $token = bin2hex(random_bytes(32));
+            
+            // Guardar token en la base de datos usando prepared statement
+            $stmt_update = $conn->prepare("UPDATE usuarios SET token_validacion = ? WHERE email = ?");
+            $stmt_update->bind_param("ss", $token, $email);
+            
+            if ($stmt_update->execute()) {
+                // Enviar email con el enlace de recuperación
+                $mail = new PHPMailer(true);
                 
-                $mail->setFrom('noreply@ofertopolis.com', 'Ofertópolis');
-                $mail->addAddress($email, $usuario['nombre']);
-                
-                $mail->isHTML(true);
-                $mail->Subject = 'Recuperación de Contraseña - Ofertópolis';
-                
-                $enlace_recuperacion = "http://" . $_SERVER['HTTP_HOST'] . "/auth/restablecer_password.php?token=$token";
-                
-                $mail->Body = "
-                    <h2>Recuperación de Contraseña</h2>
-                    <p>Hola {$usuario['nombre']},</p>
-                    <p>Recibimos una solicitud para restablecer tu contraseña en Ofertópolis.</p>
-                    <p>Hacé clic en el siguiente enlace para crear una nueva contraseña:</p>
-                    <p><a href='$enlace_recuperacion' style='background-color: #710014; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;'>Restablecer Contraseña</a></p>
-                    <p>Este enlace expirará en 1 hora.</p>
-                    <p>Si no solicitaste este cambio, podés ignorar este email.</p>
-                    <hr>
-                    <p style='font-size: 12px; color: #666;'>Ofertópolis - Tu shopping de confianza</p>
-                ";
-                
-                $mail->send();
-                $mensajeOK = "Se ha enviado un correo con las instrucciones para recuperar tu contraseña.";
-            } catch (Exception $e) {
-                $error = "Error al enviar el correo: {$mail->ErrorInfo}";
+                try {
+                    configurarMail($mail);
+                    
+                    $mail->addAddress($email, $usuario['nombre']);
+                    
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Recuperación de Contraseña - Ofertópolis';
+                    
+                    // Detectar protocolo correcto
+                    $protocolo = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+                    $enlace_recuperacion = $protocolo . "://" . $_SERVER['HTTP_HOST'] . "/auth/restablecer_password.php?token=$token";
+                    
+                    $mail->Body = "
+                        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+                            <h2 style='color: #710014;'>Recuperación de Contraseña</h2>
+                            <p>Hola <strong>{$usuario['nombre']}</strong>,</p>
+                            <p>Recibimos una solicitud para restablecer tu contraseña en Ofertópolis.</p>
+                            <p>Hacé clic en el siguiente botón para crear una nueva contraseña:</p>
+                            <div style='text-align: center; margin: 30px 0;'>
+                                <a href='$enlace_recuperacion' style='background-color: #710014; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;'>Restablecer Contraseña</a>
+                            </div>
+                            <p style='color: #666; font-size: 14px;'>O copia y pega este enlace en tu navegador:</p>
+                            <p style='color: #0066cc; font-size: 12px; word-break: break-all;'>$enlace_recuperacion</p>
+                            <p style='color: #d9534f; font-weight: bold;'>Este enlace es válido por 1 hora.</p>
+                            <p>Si no solicitaste este cambio, podés ignorar este email.</p>
+                            <hr style='margin: 30px 0; border: none; border-top: 1px solid #ddd;'>
+                            <p style='font-size: 12px; color: #666; text-align: center;'>Ofertópolis - Tu shopping de confianza</p>
+                        </div>
+                    ";
+                    
+                    $mail->send();
+                    $mensajeOK = "Se ha enviado un correo con las instrucciones para recuperar tu contraseña. Revisá tu bandeja de entrada.";
+                } catch (Exception $e) {
+                    $error = "Error al enviar el correo. Por favor, intenta nuevamente más tarde. Detalle: " . $mail->ErrorInfo;
+                }
+            } else {
+                $error = "Error al procesar la solicitud. Intenta nuevamente.";
             }
+            
+            $stmt_update->close();
         } else {
-            $error = "Error al procesar la solicitud. Intenta nuevamente.";
+            // Por seguridad, mostramos el mismo mensaje aunque el email no exista
+            $mensajeOK = "Si el email existe en nuestro sistema, recibirás las instrucciones para recuperar tu contraseña.";
         }
+        
+        $stmt->close();
     } else {
-        // Por seguridad, mostramos el mismo mensaje aunque el email no exista
-        $mensajeOK = "Si el email existe en nuestro sistema, recibirás las instrucciones para recuperar tu contraseña.";
+        $error = "Por favor, ingresa un email válido.";
     }
 }
 ?>

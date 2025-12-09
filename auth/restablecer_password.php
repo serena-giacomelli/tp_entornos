@@ -6,18 +6,23 @@ $token_valido = false;
 $usuario_id = null;
 
 // Verificar si el token es válido
-if (isset($_GET['token'])) {
+if (isset($_GET['token']) && !empty($_GET['token'])) {
     $token = $_GET['token'];
     
-    $check = $conn->query("SELECT id, nombre, email FROM usuarios WHERE token_validacion='$token'");
+    // Usar prepared statement para prevenir SQL injection
+    $stmt = $conn->prepare("SELECT id, nombre, email FROM usuarios WHERE token_validacion = ?");
+    $stmt->bind_param("s", $token);
+    $stmt->execute();
+    $result = $stmt->get_result();
     
-    if ($check->num_rows > 0) {
+    if ($result->num_rows > 0) {
         $token_valido = true;
-        $usuario = $check->fetch_assoc();
+        $usuario = $result->fetch_assoc();
         $usuario_id = $usuario['id'];
     } else {
         $error = "El enlace de recuperación es inválido o ha expirado.";
     }
+    $stmt->close();
 }
 
 // Procesar el cambio de contraseña
@@ -26,30 +31,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['token'])) {
     $password = trim($_POST['password']);
     $confirm_password = trim($_POST['confirm_password']);
     
-    if ($password !== $confirm_password) {
+    if (empty($password) || empty($confirm_password)) {
+        $error = "Todos los campos son obligatorios.";
+    } elseif ($password !== $confirm_password) {
         $error = "Las contraseñas no coinciden.";
     } elseif (strlen($password) < 6) {
         $error = "La contraseña debe tener al menos 6 caracteres.";
     } else {
-        // Verificar token nuevamente
-        $check = $conn->query("SELECT id FROM usuarios WHERE token_validacion='$token'");
+        // Verificar token nuevamente usando prepared statement
+        $stmt = $conn->prepare("SELECT id FROM usuarios WHERE token_validacion = ?");
+        $stmt->bind_param("s", $token);
+        $stmt->execute();
+        $result = $stmt->get_result();
         
-        if ($check->num_rows > 0) {
-            $usuario = $check->fetch_assoc();
+        if ($result->num_rows > 0) {
+            $usuario = $result->fetch_assoc();
             $password_hash = md5($password);
             
-            // Actualizar contraseña y eliminar token
-            $sql = "UPDATE usuarios SET password='$password_hash', token_validacion=NULL WHERE id={$usuario['id']}";
+            // Actualizar contraseña y eliminar token usando prepared statement
+            $stmt_update = $conn->prepare("UPDATE usuarios SET password = ?, token_validacion = NULL WHERE id = ?");
+            $stmt_update->bind_param("si", $password_hash, $usuario['id']);
             
-            if ($conn->query($sql)) {
+            if ($stmt_update->execute()) {
                 $mensajeOK = "Tu contraseña ha sido actualizada exitosamente. Ya podés iniciar sesión.";
                 $token_valido = false;
             } else {
                 $error = "Error al actualizar la contraseña. Intenta nuevamente.";
             }
+            $stmt_update->close();
         } else {
             $error = "El enlace de recuperación es inválido o ha expirado.";
         }
+        $stmt->close();
     }
 }
 ?>
