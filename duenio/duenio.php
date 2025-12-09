@@ -437,7 +437,6 @@ $promos = $conn->query("SELECT p.*, l.nombre AS local
 
 <?php include("../includes/footer.php"); ?>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 // Validación de fechas en el formulario de promociones
 document.addEventListener('DOMContentLoaded', function() {

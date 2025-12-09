@@ -387,6 +387,5 @@ $params_url_string = implode("&", array_filter($params_url, function($p) { retur
 
 <?php include("../includes/footer.php"); ?>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

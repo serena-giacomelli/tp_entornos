@@ -1,11 +1,8 @@
-# Script para reemplazar / por / en todos los archivos PHP
-# Ejecutar en PowerShell desde la carpeta del proyecto
 
 $rutaProyecto = "C:\xampp\htdocs\tp_eg"
 $buscar = "/"
 $reemplazar = "/"
 
-# Obtener todos los archivos PHP recursivamente
 $archivos = Get-ChildItem -Path $rutaProyecto -Recurse -Include *.php
 
 Write-Host "Buscando archivos PHP..." -ForegroundColor Yellow

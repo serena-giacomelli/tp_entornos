@@ -7,14 +7,15 @@ include_once("includes/db.php");
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ofertópolis</title>
   <meta name="description" content="Descubrí las mejores promociones y descuentos exclusivos en tu shopping favorito. Ofertas para clientes Inicial, Medium y Premium.">
+  <title>Ofertópolis - Tu shopping con las mejores promociones</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="css/estilos.css?v=<?php echo time(); ?>" rel="stylesheet">
   <link href="css/header.css?v=<?php echo time(); ?>" rel="stylesheet">
   <link href="css/footer.css?v=<?php echo time(); ?>" rel="stylesheet">
   <link href="css/hero.css?v=<?php echo time(); ?>" rel="stylesheet">
   <link href="css/cards.css?v=<?php echo time(); ?>" rel="stylesheet">
+  <link href="css/utilities.css?v=<?php echo time(); ?>" rel="stylesheet">
   <style>
     /* Animaciones para el carousel */
     .carousel-item {
@@ -135,12 +136,12 @@ include_once("includes/db.php");
 
 <?php include("includes/header.php"); ?>
 
-<main id="main-content" class="main-content">
+<main id="main-content" class="main-content" role="main">
   <?php include("includes/hero.php"); ?>
 
   <!-- CAROUSEL DE PROMOCIONES DESTACADAS -->
-  <section id="promociones" class="container my-5 section-animate">
-    <h2 class="section-title text-center mb-4">Promociones Destacadas</h2>
+  <section id="promociones" class="container my-5 section-animate" aria-labelledby="promociones-title">
+    <h2 id="promociones-title" class="section-title text-center mb-4">Promociones Destacadas</h2>
 
     <?php
     // Obtener las 6 promociones más recientes aprobadas
@@ -155,16 +156,16 @@ include_once("includes/db.php");
     ?>
 
     <?php if ($result_promos && $result_promos->num_rows > 0): ?>
-      <div id="promocionesCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover">
-        <div class="carousel-indicators">
+      <div id="promocionesCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover" aria-label="Carrusel de promociones destacadas">
+        <div class="carousel-indicators" role="tablist" aria-label="Indicadores de promociones">
           <?php for($i = 0; $i < ceil($result_promos->num_rows / 3); $i++): ?>
             <button type="button" data-bs-target="#promocionesCarousel" data-bs-slide-to="<?= $i ?>" 
                     class="<?= $i === 0 ? 'active' : '' ?>" aria-current="<?= $i === 0 ? 'true' : 'false' ?>" 
-                    aria-label="Slide <?= $i + 1 ?>"></button>
+                    aria-label="Grupo de promociones <?= $i + 1 ?>" role="tab"></button>
           <?php endfor; ?>
         </div>
         
-        <div class="carousel-inner">
+        <div class="carousel-inner" role="region" aria-live="polite">
           <?php 
           $promos = [];
           while($row = $result_promos->fetch_assoc()) {
@@ -218,8 +219,8 @@ include_once("includes/db.php");
   </section>
 
   <!-- CAROUSEL DE NOVEDADES -->
-  <section id="novedades" class="container mt-4 mb-5 section-animate">
-    <h2 class="section-title text-center mb-2">Últimas Novedades</h2>
+  <section id="novedades" class="container mt-4 mb-5 section-animate" aria-labelledby="novedades-title">
+    <h2 id="novedades-title" class="section-title text-center mb-2">Últimas Novedades</h2>
 
     <?php
     // Obtener las 4 novedades más recientes vigentes
@@ -231,16 +232,16 @@ include_once("includes/db.php");
     ?>
 
     <?php if ($result_novedades && $result_novedades->num_rows > 0): ?>
-      <div id="novedadesCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="6000" data-bs-pause="hover">
-        <div class="carousel-indicators">
+      <div id="novedadesCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="6000" data-bs-pause="hover" aria-label="Carrusel de últimas novedades">
+        <div class="carousel-indicators" role="tablist" aria-label="Indicadores de novedades">
           <?php for($i = 0; $i < $result_novedades->num_rows; $i++): ?>
             <button type="button" data-bs-target="#novedadesCarousel" data-bs-slide-to="<?= $i ?>" 
                     class="<?= $i === 0 ? 'active' : '' ?>" aria-current="<?= $i === 0 ? 'true' : 'false' ?>" 
-                    aria-label="Slide <?= $i + 1 ?>"></button>
+                    aria-label="Novedad <?= $i + 1 ?>" role="tab"></button>
           <?php endfor; ?>
         </div>
         
-        <div class="carousel-inner">
+        <div class="carousel-inner" role="region" aria-live="polite">
           <?php 
           $novedades = [];
           while($row = $result_novedades->fetch_assoc()) {
@@ -285,7 +286,6 @@ include_once("includes/db.php");
 
 <?php include("includes/footer.php"); ?>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   // Animaciones avanzadas para los carousels
   document.addEventListener('DOMContentLoaded', function() {

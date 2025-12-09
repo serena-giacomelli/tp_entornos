@@ -287,6 +287,5 @@ $locales_disponibles = $conn->query("SELECT * FROM locales WHERE id_duenio IS NU
 
 <?php include("../includes/footer.php"); ?>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

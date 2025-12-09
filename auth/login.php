@@ -64,6 +64,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </div>
       </div>
       
+      <div style="text-align: right; margin-top: -10px; margin-bottom: 15px;">
+        <a href="recuperar_password.php" class="form-footer-link" style="font-size: 0.9rem;">¿Olvidaste tu contraseña?</a>
+      </div>
+      
       <div class="form-button-group">
         <button type="submit" class="btn-primary-custom" style="width: 100%;">Entrar</button>
         <a href="../index.php" class="btn-outline-custom" style="width: 100%; text-align: center; text-decoration: none; display: inline-block;">← Volver al Inicio</a>

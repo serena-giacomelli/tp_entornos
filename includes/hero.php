@@ -1,13 +1,19 @@
 <?php
-// Definir las imágenes estáticas del carousel
+// Definir las imágenes estáticas del carousel con descripciones accesibles
 $imagenes_hero = [
-    '/imagenes/img1.jpg',
-    '/imagenes/img2.jpg'
+    [
+        'src' => '/imagenes/img1.jpg',
+        'alt' => 'Shopping Ofertópolis - Vista del centro comercial con locales y promociones destacadas'
+    ],
+    [
+        'src' => '/imagenes/img2.jpg',
+        'alt' => 'Cafeteria en Ofertópolis - Ambiente para disfrutar de café y postres'
+    ]
 ];
 ?>
 
-<section class="hero-carousel-section fade-in" role="banner">
-  <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000" data-bs-pause="false">
+<section class="hero-carousel-section fade-in" role="banner" aria-label="Carrusel principal de imágenes destacadas">
+  <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000" data-bs-pause="false" aria-roledescription="carrusel"
     
     <!-- Indicadores -->
     <div class="carousel-indicators">
@@ -16,7 +22,7 @@ $imagenes_hero = [
                 data-bs-target="#heroCarousel" 
                 data-bs-slide-to="<?php echo $index; ?>" 
                 <?php echo $index === 0 ? 'class="active" aria-current="true"' : ''; ?>
-                aria-label="Slide <?php echo $index + 1; ?>">
+                aria-label="Ir a imagen <?php echo $index + 1; ?>">
         </button>
       <?php endforeach; ?>
     </div>
@@ -25,7 +31,7 @@ $imagenes_hero = [
     <div class="carousel-inner">
       <?php foreach ($imagenes_hero as $index => $imagen): ?>
         <div class="carousel-item <?php echo $index === 0 ? 'active' : ''; ?>">
-          <img src="<?php echo $imagen; ?>" class="d-block w-100 hero-carousel-img" alt="Imagen <?php echo $index + 1; ?>">
+          <img src="<?php echo $imagen['src']; ?>" class="d-block w-100 hero-carousel-img" alt="<?php echo $imagen['alt']; ?>">
         </div>
       <?php endforeach; ?>
     </div>

@@ -50,6 +50,9 @@ if (!empty($_GET['orden'])) {
         case 'titulo_desc':
             $order_by = "titulo DESC";
             break;
+        default:
+            $order_by = "fecha_publicacion DESC";
+            break;
     }
 }
 
@@ -169,6 +172,5 @@ $result = $conn->query($sql);
 
 <?php include("includes/footer.php"); ?>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

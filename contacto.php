@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $email = trim($_POST['email']);
   $mensaje = trim($_POST['mensaje']);
 
-  if ($nombre && $email && $mensaje) {
+  if (!empty($nombre) && !empty($email) && !empty($mensaje)) {
     $sql = "INSERT INTO contactos (nombre, email, mensaje) VALUES ('$nombre', '$email', '$mensaje')";
     if ($conn->query($sql)) {
       
@@ -211,6 +211,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 <?php include("includes/footer.php"); ?>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
